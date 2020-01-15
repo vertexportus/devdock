@@ -12,6 +12,7 @@ command_modules = {
     "docker",
     "shell",
     "git",
+    "config",
 }
 
 

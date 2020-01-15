@@ -1,3 +1,4 @@
+import os
 import argparse
 from commands import base_command
 from utils import env, ProjectConfigManager
@@ -31,17 +32,13 @@ class Docker(base_command.BaseCommand):
         parser_logs = subparser.add_parser('logs', help="shows all container logs (or specified container logs)")
         parser_logs.add_argument('container', help="specific container to show logs from", nargs="?", default="all")
         parser_logs.add_argument('-f', '--follow', action="store_true", help="follow log output")
-        # docker config
-        parser_config = subparser.add_parser('config', help="config commands for managing project "
-                                                            "docker/docker-compose setup")
-        config_subparser = parser_config.add_subparsers(required=True, dest="docker_config_command",
-                                                        help="docker config commands")
-        config_subparser.add_parser('update', help="creates/updates docker config based on project config")
 
     def process_command(self):
         getattr(self, f"_{self._args.sub_command}_handler")()
 
     def _up_handler(self):
+        if not os.path.isfile(env.docker_compose_config_path()):
+            ProjectConfigManager().update()
         self.run_shell("docker-compose down")
         if self._args.rebuild:
             self.run_shell("docker-compose build --no-cache")
@@ -49,25 +46,29 @@ class Docker(base_command.BaseCommand):
         self.run_shell(f"docker-compose up {up_args}")
 
     def _down_handler(self):
+        if not os.path.isfile(env.docker_compose_config_path()):
+            raise Exception("no docker-compose file generated yet for current ENV")
         down_args = ' '.join(self._args.params) if len(self._args.params) > 0 else '--remove-orphans'
         self.run_shell(f"docker-compose down {down_args}")
 
     def _destroy_handler(self):
+        if not os.path.isfile(env.docker_compose_config_path()):
+            raise Exception("no docker-compose file generated yet for current ENV")
         self.run_shell("docker-compose down --rmi all --remove-orphans")
 
     def _ps_handler(self):
+        if not os.path.isfile(env.docker_compose_config_path()):
+            raise Exception("no docker-compose file generated yet for current ENV")
         self.run_shell('docker-compose ps')
 
     def _exec_handler(self):
+        if not os.path.isfile(env.docker_compose_config_path()):
+            raise Exception("no docker-compose file generated yet for current ENV")
         exec_args = f"{self._args.exec_command} {' '.join(self._args.params) if len(self._args.params) else ''}"
         self.run_shell(f"docker-compose exec {self._args.container} {exec_args}")
 
     def _logs_handler(self):
+        if not os.path.isfile(env.docker_compose_config_path()):
+            raise Exception("no docker-compose file generated yet for current ENV")
         logs_args = f"{self._args.container if self._args.container != 'all' else ''} {'-f' if self._args.follow else ''}"
         self.run_shell(f"docker-compose logs {logs_args}")
-
-    def _config_handler(self):
-        getattr(self, f"_config_{self._args.docker_config_command}_handler")()
-
-    def _config_update_handler(self):
-        ProjectConfigManager().update()

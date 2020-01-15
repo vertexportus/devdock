@@ -21,8 +21,10 @@ class ProjectConfigManager:
                     template_config = {**template_config, **port_map_config['services'][template_name]}
                 self._compose['services'][service_name] = template_config
             self._compose['volumes'] = {**self._compose['volumes'], **template['volumes']}
-        with open(env.project_path(f"devdock/docker/gen/docker-compose-{for_env if for_env else env.env()}.yaml"), 'w')\
-                as docker_compose_file:
+        gen_path = env.docker_gen_path()
+        if not os.path.isdir(gen_path):
+            os.mkdir(gen_path)
+        with open(env.docker_compose_config_path(for_env), 'w') as docker_compose_file:
             yaml.dump(self._compose, docker_compose_file)
 
     @staticmethod
