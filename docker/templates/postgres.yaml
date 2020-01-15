@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  %(name):
+    image: postgres:12-alpine
+    volumes:
+      - %(name)-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=%(env_map.user:$POSTGRES_USER)
+      - POSTGRES_PASSWORD=%(env_map.password:$POSTGRES_PASSWORD)
+      - POSTGRES_DB=%(env_map.database:$POSTGRES_DB)
+
+volumes:
+  %(name)-data:

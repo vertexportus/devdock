@@ -1,12 +1,13 @@
 import argparse
 from commands import base_command
+from utils import env, ProjectConfigManager
 
 
 class Docker(base_command.BaseCommand):
     @staticmethod
     def argparse(parser, subparsers):
         parser_main = subparsers.add_parser('docker', help="runs pre-defined docker or docker-compose commands")
-        subparser = parser_main.add_subparsers(required=True, dest="subcommand", help="Docker subcommands")
+        subparser = parser_main.add_subparsers(required=True, dest="sub_command", help="Docker sub commands")
         # docker up
         parser_up = subparser.add_parser('up', help="starts containers")
         parser_up.add_argument('-a', '--attach', action="store_true", help="attach to docker-compose process")
@@ -30,9 +31,15 @@ class Docker(base_command.BaseCommand):
         parser_logs = subparser.add_parser('logs', help="shows all container logs (or specified container logs)")
         parser_logs.add_argument('container', help="specific container to show logs from", nargs="?", default="all")
         parser_logs.add_argument('-f', '--follow', action="store_true", help="follow log output")
+        # docker config
+        parser_config = subparser.add_parser('config', help="config commands for managing project "
+                                                            "docker/docker-compose setup")
+        config_subparser = parser_config.add_subparsers(required=True, dest="docker_config_command",
+                                                        help="docker config commands")
+        config_subparser.add_parser('update', help="creates/updates docker config based on project config")
 
     def process_command(self):
-        getattr(self, f"_{self._args.subcommand}_handler")()
+        getattr(self, f"_{self._args.sub_command}_handler")()
 
     def _up_handler(self):
         self.run_shell("docker-compose down")
@@ -58,3 +65,9 @@ class Docker(base_command.BaseCommand):
     def _logs_handler(self):
         logs_args = f"{self._args.container if self._args.container != 'all' else ''} {'-f' if self._args.follow else ''}"
         self.run_shell(f"docker-compose logs {logs_args}")
+
+    def _config_handler(self):
+        getattr(self, f"_config_{self._args.docker_config_command}_handler")()
+
+    def _config_update_handler(self):
+        ProjectConfigManager().update()
