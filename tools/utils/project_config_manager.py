@@ -29,9 +29,12 @@ class ProjectConfigManager:
 
     @staticmethod
     def _load_template(template_name, service_config) -> dict:
-        regex = re.compile(r"%\((.+)\)")
-        with open(env.project_path(f"devdock/docker/templates/{template_name}.yaml"), 'r') as stream:
+        template_file = env.project_path(f"devdock/docker/templates/{template_name}.yaml")
+        if not os.path.isfile(template_file):
+            raise Exception(f"template {template_name} does not exist")
+        with open(template_file, 'r') as stream:
             yaml_data = stream.read()
+        regex = re.compile(r"%\((.+)\)")
         for var in regex.findall(yaml_data):
             replace_var = f"%({var})"
             if ':' in var:
