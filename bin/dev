@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# tools paths
+tools_full_path=$(realpath $(dirname "$0")/../tools)
+export CLI_COMMAND=$(basename "$0")
+# run command
+$tools_full_path/cli.py $*

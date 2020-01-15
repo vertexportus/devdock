@@ -1,0 +1,5 @@
+# IDEs and Editors
+.idea/
+
+# python
+__pycache__
