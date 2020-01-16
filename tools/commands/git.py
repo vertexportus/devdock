@@ -1,7 +1,7 @@
 import argparse
 import git
 from git import Repo
-from utils import env, GitProgress
+from utils import env, GitProgress, ProjectConfigManager
 from utils.colors import *
 from commands import base_command
 
@@ -25,14 +25,14 @@ class Git(base_command.BaseCommand):
             self._default_handler()
 
     def _clone_handler(self):
-        projects = env.projects()
+        projects = ProjectConfigManager().get_projects()
         if 'all' in self._args.project:
-            for project, repo_url in projects:
-                self.__git_clone(project, repo_url)
+            for project, project_config in projects.items():
+                self.__git_clone(project, project_config['repo'])
         else:
             project = self._args.project
             if project in projects.keys():
-                self.__git_clone(project, projects[project])
+                self.__git_clone(project, projects[project]['repo'])
             else:
                 raise Exception(f"no configuration set for project '{self._args.project}'")
 
@@ -43,8 +43,7 @@ class Git(base_command.BaseCommand):
     def __git_clone(project, repo_url):
         print(blue(f"cloning repository for {project}"))
         try:
-            repo = Repo.clone_from(f"{'https://github.com/' if env.git_use_https() else 'git@github.com:'}{repo_url}",
-                                   f"src/{project}", progress=GitProgress())
+            Repo.clone_from(repo_url, project, progress=GitProgress())
         except git.exc.GitCommandError as git_error:
-            print(red(f"Error cloning {project}:\n"))
+            print(red(f"Error cloning '{project}'\n"))
             raise git_error

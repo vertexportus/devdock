@@ -1,29 +1,33 @@
 import os
 
 
-def cli_command():
+def cli_command() -> str:
     return os.environ['CLI_COMMAND']
 
 
-def env():
+def env() -> str:
     return os.environ['ENV']
 
 
-def compose_project_name():
+def compose_project_name() -> str:
     return os.environ['COMPOSE_PROJECT_NAME'] if 'COMPOSE_PROJECT_NAME' in os.environ else 'devdock'
 
 
-def project_path(suffix=None):
+def project_path(suffix=None) -> str:
     return os.path.abspath(f"{os.environ['PROJECT_PATH']}{'/' + suffix if suffix else ''}")
 
 
-def project_config_path():
+def project_config_file_path() -> str:
     return project_path("project.yaml")
 
 
-def docker_gen_path(suffix=None):
+def docker_template_path(suffix=None) -> str:
+    return project_path(f"devdock/docker/templates{'/' + suffix if suffix else ''}")
+
+
+def docker_gen_path(suffix=None) -> str:
     return project_path(f"devdock/docker/gen{'/' + suffix if suffix else ''}")
 
 
-def docker_compose_config_path(for_env=None):
+def docker_compose_file_path(for_env=None) -> str:
     return docker_gen_path(f"docker-compose-{for_env if for_env else env()}.yaml")

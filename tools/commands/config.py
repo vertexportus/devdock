@@ -18,4 +18,4 @@ class Config(base_command.BaseCommand):
         getattr(self, f"_{self._args.config_command}_handler")()
 
     def _docker_handler(self):
-        ProjectConfigManager().update(self._args.env)
+        ProjectConfigManager().generate_docker(self._args.env)

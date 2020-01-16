@@ -2,7 +2,7 @@ version: '3'
 
 services:
   %(name):
-    image: postgres:12-alpine
+    image: postgres:%(tag:12-alpine)
     volumes:
       - %(name)-data:/var/lib/postgresql/data
     environment:
