@@ -1,7 +1,8 @@
 import argparse
 import git
 from git import Repo
-from utils import env, GitProgress, ProjectConfigManager
+from utils import env, GitProgress
+from project import ProjectConfigManager
 from utils.colors import *
 from commands import base_command
 

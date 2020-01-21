@@ -1,7 +1,8 @@
 import os
 import argparse
 from commands import base_command
-from utils import env, ProjectConfigManager
+from utils import env
+from project import ProjectConfigManager
 import utils.colors
 
 
