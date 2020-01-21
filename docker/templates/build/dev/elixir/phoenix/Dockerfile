@@ -22,6 +22,6 @@ WORKDIR /app
 RUN mix local.hex --force && mix archive.install hex phx_new --force && mix local.rebar --force
 
 # finalize
-ADD
+ADD entrypoint.sh /docker-entrypoint.sh
 EXPOSE 4000
 CMD ["/docker-entrypoint.sh"]

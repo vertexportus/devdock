@@ -8,6 +8,12 @@ elixir_phoenix:
   volumes:
     mapped:
       - "%(project.path):/app"
+  env:
+    imported:
+      - database.user
+      - database.password
+      - database.database
+      - database.port
   ports:
     4000:
       env: PORT

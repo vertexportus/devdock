@@ -7,9 +7,14 @@ postgres:
       data: /var/lib/postgresql/data
   env:
     prefixed:
-      POSTGRES_USER: USER
-      POSTGRES_PASSWORD: PASSWORD
-      POSTGRES_DB: DATABASE
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database
+    exported:
+      - user
+      - password
+      - database
+      - port
   ports:
     5432:
-      env: PORT
+      env: port
