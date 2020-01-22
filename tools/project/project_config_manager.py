@@ -1,17 +1,21 @@
 import os
 import re
+import shutil
 from pprint import pp
 
 import yaml
 from dict_deep import deep_get
+
+from .project_config import ProjectConfig
 from utils import env
 
 
 class ProjectConfigManager:
     def __init__(self):
-        self._compose = None
-        with open(env.project_config_file_path(), 'r') as stream:
-            self._config = yaml.load(stream, Loader=yaml.FullLoader)
+        self._config = ProjectConfig.load()
+        # self._compose = None
+        # with open(env.project_config_file_path(), 'r') as stream:
+        #     self._config = yaml.load(stream, Loader=yaml.FullLoader)
 
     def get_projects(self):
         return self._config['projects']
@@ -33,6 +37,7 @@ class ProjectConfigManager:
         return services
 
     def get_env(self, for_env=env.env()) -> dict:
+        return
         envs = {}
         self._pre_generate_compose()
         self._calculate_dependencies()
@@ -43,6 +48,7 @@ class ProjectConfigManager:
         return envs
 
     def generate_docker(self, for_env=env.env()):
+        return
         # get and mkdir gen path
         self._compose = {
             'version': '3',
@@ -56,12 +62,13 @@ class ProjectConfigManager:
         self._pre_generate_compose()
         self._calculate_dependencies()
         # write docker-compose file
-        self._write_compose(for_env)
+        self._write_compose_and_buildfiles(for_env)
 
-    def _write_compose(self, for_env):
+    def _write_compose_and_buildfiles(self, for_env):
         for service_name, service_config in self.get_services().items():
             for container_name, container_config in service_config['gen'].items():
                 self._compose['services'][container_name] = container_config['compose']
+                self._generate_buildfiles(for_env, container_config['template'])
         with open(env.docker_compose_file_path(for_env), 'w') as docker_compose_file:
             yaml.dump(self._compose, docker_compose_file)
 
@@ -149,6 +156,7 @@ class ProjectConfigManager:
             if 'gen' not in config:
                 config['gen'] = {}
             config['gen'][fullname] = {
+                'template': config['template'],
                 'compose': compose_config,
                 'envs': {
                     'all': all_envs,
@@ -180,7 +188,6 @@ class ProjectConfigManager:
                     exported_vars['database'] = {**exported_vars['database'], **cconf['envs']['exported']}
                 depends_on += depended_service['gen'].keys()
             container_config['compose']['depends_on'] = depends_on
-
             # imported vars
             all_vars = container_config['envs']['all']
             environment = container_config['compose']['environment']
@@ -242,44 +249,14 @@ class ProjectConfigManager:
             return var
 
     @classmethod
-    def _load_compose_template(cls, template_name, service_config) -> dict:
-        result = {'services': {}}
-        template_file = env.docker_template_path(f"compose/{template_name}.yaml")
-        yaml_data = cls._load_parse_file(template_file, service_config)
-        template = yaml.load(yaml_data, Loader=yaml.FullLoader)
-        return result
-
-    @classmethod
-    def _generate_build_templates(cls, for_env, template_name, service_config):
+    def _generate_buildfiles(cls, for_env, template_name):
         build_path = f"{for_env}/{template_name.replace('.', '/')}"
         template_build_path = env.docker_template_path(f"build/{build_path}")
         gen_path = env.docker_gen_path(f"build/{build_path}")
         if os.path.isdir(template_build_path):
+            if not os.path.exists(gen_path):
+                os.makedirs(gen_path)
             for filename in os.listdir(template_build_path):
-                file_data = cls._load_parse_file(f"{template_build_path}/{filename}", service_config)
-                gen_file_path = f"{gen_path}/{filename}"
-                if not os.path.exists(gen_file_path):
-                    os.makedirs(os.path.dirname(gen_file_path))
-                with open(gen_file_path, 'w') as stream:
-                    stream.write(file_data)
-
-    @staticmethod
-    def _load_parse_file(file_path, config) -> str:
-        if not os.path.isfile(file_path):
-            raise Exception(f"file '{file_path}' does not exist")
-        with open(file_path, 'r') as stream:
-            file_data = stream.read()
-        regex = re.compile(r"%\((.+)\)")
-        for var in regex.findall(file_data):
-            replace_var = f"%({var})"
-            if ':' in var:
-                [var, default_val] = var.split(':')
-                if '=' in default_val:
-                    [default_val, default_default] = default_val.split('=')
-                    default_val = f"${{{default_val[1:]}:-{default_default}}}"
-                value = deep_get(config, var)
-                file_data = file_data.replace(replace_var, value if value else default_val)
-            else:
-                value = deep_get(config, var)
-                file_data = file_data.replace(replace_var, value if value else '')
-        return file_data
+                orig_file_path = f"{template_build_path}/{filename}"
+                dest_file_path = f"{gen_path}/{filename}"
+                shutil.copyfile(orig_file_path, dest_file_path)

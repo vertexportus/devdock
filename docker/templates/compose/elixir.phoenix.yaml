@@ -1,4 +1,6 @@
 elixir_phoenix:
+  required:
+    - database
   build:
     context: build/${ENV}/elixir/phoenix
     args:
@@ -10,10 +12,10 @@ elixir_phoenix:
       - "%(project.path):/app"
   env:
     imported:
-      - database.user
-      - database.password
-      - database.database
-      - database.port
+      DB_USER: database.user
+      DB_PASSWORD: database.password
+      DB_PORT: database.port
+      DB_HOST: database
   ports:
     4000:
       env: PORT

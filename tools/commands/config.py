@@ -22,12 +22,12 @@ class Config(base_command.BaseCommand):
 
     def _docker_handler(self):
         manager = ProjectConfigManager()
-        if self._args.generate:
-            manager.generate_docker(self._args.env)
-            print(blue(f"generated: {env.docker_compose_file_path(self._args.env)}"))
-        envs = manager.get_env()
-        for service_name, service_vars in envs.items():
-            print(green(f"\nService: {service_name}\n"))
-            for var in service_vars:
-                print(var)
-        print('')
+        # if self._args.generate:
+        #     manager.generate_docker(self._args.env)
+        #     print(blue(f"generated: {env.docker_compose_file_path(self._args.env)}"))
+        # envs = manager.get_env()
+        # for service_name, service_vars in envs.items():
+        #     print(green(f"\nService: {service_name}\n"))
+        #     for var in service_vars:
+        #         print(var)
+        # print('')

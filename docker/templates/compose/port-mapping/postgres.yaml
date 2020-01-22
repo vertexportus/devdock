@@ -1,6 +1,0 @@
-version: '3'
-
-services:
-  %(name):
-    ports:
-      - %(env_map.port:$POSTGRES_PORT=5432):5432
