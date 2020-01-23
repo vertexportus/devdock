@@ -220,34 +220,6 @@ class ProjectConfigManager:
         with open(template_file, 'r') as stream:
             return yaml.load(stream, Loader=yaml.FullLoader)
 
-    @staticmethod
-    def _parse_var(var, config):
-        # if its a variable
-        if '%(' in var:
-            regex = re.compile(r"%\((.+)\)")
-            result = regex.findall(var)
-            # if regex found variable dot path
-            if len(result) > 0:
-                default_val = None
-                dot_path = result[0]
-                # take care to allow for default values
-                if ':' in dot_path:
-                    [dot_path, default_val] = dot_path.split(':')
-                val = deep_get(config, dot_path)
-                if not val:
-                    if not default_val:
-                        raise Exception(f"{dot_path} not found in service config")
-                    else:
-                        return default_val
-                else:
-                    return val
-            # regex found no variable
-            else:
-                return var
-        # its not a variable
-        else:
-            return var
-
     @classmethod
     def _generate_buildfiles(cls, for_env, template_name):
         build_path = f"{for_env}/{template_name.replace('.', '/')}"

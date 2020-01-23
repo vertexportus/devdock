@@ -1,7 +1,7 @@
 postgres:
   image:
     name: postgres
-    tag: 12-alpine
+    tag: "%(service.tag:12-alpine)"
   volumes:
     named:
       data: /var/lib/postgresql/data

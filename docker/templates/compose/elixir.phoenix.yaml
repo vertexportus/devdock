@@ -4,7 +4,7 @@ elixir_phoenix:
   build:
     context: build/${ENV}/elixir/phoenix
     args:
-      TAG: "%(tag:1.9-alpine)"
+      TAG: "%(service.tag:1.9-alpine)"
       USERID: ${USERID}
       GROUPID: ${GROUPID}
   volumes:
@@ -15,7 +15,9 @@ elixir_phoenix:
       DB_USER: database.user
       DB_PASSWORD: database.password
       DB_PORT: database.port
-      DB_HOST: database
+      DB_HOST: database.host
+    exported:
+      - port
   ports:
     4000:
-      env: PORT
+      env: port
