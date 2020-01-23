@@ -1,10 +1,8 @@
 import functools
 import os
 import re
-from pprint import pp
 
 import yaml
-from dict_deep import deep_get
 
 from utils import env
 
@@ -27,7 +25,6 @@ class ProjectConfig:
         for project in self.projects.values():
             for project_service in project.services.values():
                 project_service.update_references()
-        print(self)
 
     def __str__(self):
         projects = functools.reduce(lambda a, b: f"{a}\n{b}", [f" -- {k}: {v}" for k, v in self.projects.items()])
@@ -45,6 +42,15 @@ class ProjectConfig:
                 return None
         else:
             return self.services[service_path] if service_path in self.services else None
+
+    def get_compose(self):
+        compose = {'services': {}, 'volumes': {}}
+        for service in self.services.values():
+            service.generate_compose(compose)
+        for project in self.projects.values():
+            for project_service in project.services.values():
+                project_service.generate_compose(compose)
+        return compose
 
 
 class BaseConfig:
@@ -214,35 +220,48 @@ class ServiceTemplatePorts:
         return f"ports:\n        {ports}"
 
 
-class ServiceTemplate(BaseConfig):
-    file_path: str
-    required: list
+class ContainerTemplate(BaseConfig):
     image: ServiceTemplateImage
     volumes: ServiceTemplateVolumes
     env: ServiceTemplateEnv
     ports: ServiceTemplatePorts
+
+    def __init(self, name, template, service, data):
+        super().__init__(name, data)
+        self.template = template
+        self.service = service
+        self.env = ServiceTemplateEnv(self, data=self.try_get('env', {}))
+        self.image = ServiceTemplateImage(self, self._original_data)
+        self.volumes = ServiceTemplateVolumes(self, data=self.try_get('volumes', {}))
+        self.ports = ServiceTemplatePorts(self, data=self.try_get('ports', {}))
+
+    def __str__(self):
+        return (f"      - {self.image}"
+                f"      - {self.volumes}"
+                f"      - {self.env}"
+                f"      - {self.ports}")
+
+
+class ServiceTemplate(BaseConfig):
+    file_path: str
+    required: list
+    containers: list
 
     def __init__(self, name, service):
         self.service = service
         self.file_path = env.docker_template_path(f"compose/{name}.yaml")
         with open(self.file_path, 'r') as stream:
             raw_data = yaml.load(stream, Loader=yaml.FullLoader)
-        super().__init__(name, raw_data[name.replace('.', '_')])
+        super().__init__(name, raw_data)
         self._validate_required()
-        self.env = ServiceTemplateEnv(self, data=self.try_get('env', {}))
-        self.image = ServiceTemplateImage(self, self._original_data)
-        self.volumes = ServiceTemplateVolumes(self, data=self.try_get('volumes', {}))
-        self.ports = ServiceTemplatePorts(self, data=self.try_get('ports', {}))
 
     def calculate_final_env(self):
-        self.env.calculate_final_env()
+        for container in self.containers:
+            container.env.calculate_final_env()
 
     def __str__(self):
         return (f"{self.name}\n"
-                f"      - {self.image}"
-                f"      - {self.volumes}"
-                f"      - {self.env}"
-                f"      - {self.ports}")
+                f"{self.containers}")
 
     def _validate_required(self):
         self.required = self.try_get('required', [])
@@ -272,6 +291,9 @@ class Service(BaseConfig):
 
     def __str__(self):
         return f"service {self.name} ({self.fullname})\n    template: {self.template}"
+
+    def generate_compose(self, compose):
+        pass
 
     def parse_var(self, var):
         # if its a variable
