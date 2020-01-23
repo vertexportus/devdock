@@ -1,6 +1,7 @@
 import functools
 import os
 import re
+from pprint import pp
 
 import yaml
 
@@ -25,6 +26,9 @@ class ProjectConfig:
         for project in self.projects.values():
             for project_service in project.services.values():
                 project_service.update_references()
+        # print(self)
+        compose = self.get_compose()
+        pp(compose)
 
     def __str__(self):
         projects = functools.reduce(lambda a, b: f"{a}\n{b}", [f" -- {k}: {v}" for k, v in self.projects.items()])
@@ -92,15 +96,15 @@ class Project(BaseConfig):
         return f"project {self.name}\n  services:{len(self.services)}\n{services}"
 
 
-class ServiceTemplateVolumes:
+class ContainerTemplateVolumes:
     named: dict
     mapped: list
 
-    def __init__(self, template, data):
-        self.template = template
+    def __init__(self, container, data):
+        self.container = container
         self.named = {
-            f"{template.service.fullname}_{k}": v for k, v in (data['named'].items() if 'named' in data else {})}
-        self.mapped = list(map(lambda v: template.service.parse_var(v),
+            f"{container.template.service.fullname}_{k}": v for k, v in (data['named'].items() if 'named' in data else {})}
+        self.mapped = list(map(lambda v: container.template.service.parse_var(v),
                                data['mapped'] if 'mapped' in data else []))
 
     def __str__(self):
@@ -108,17 +112,27 @@ class ServiceTemplateVolumes:
                 f"         - named: {self.named if len(self.named) > 0 else '<none>'}\n"
                 f"         - mapped: {self.mapped if len(self.mapped) > 0 else '<none>'}\n")
 
+    def generate_compose(self, compose_service, compose_volumes):
+        if len(self.named) == 0 and len(self.mapped) == 0:
+            return
+        if 'volumes' not in compose_service:
+            compose_service['volumes'] = []
+        for volume_name, named_volume_config in self.named.items():
+            compose_service['volumes'].append(f"{volume_name}:{named_volume_config}")
+            compose_volumes[volume_name] = ''
+        compose_service['volumes'] += self.mapped
 
-class ServiceTemplateEnv:
+
+class ContainerTemplateEnv:
     prefix: str
     prefixed: dict
     exported: dict
     imported: dict
     environment: dict
 
-    def __init__(self, template, data):
-        self.template = template
-        self.prefix = template.service.env_prefix.upper()
+    def __init__(self, container, data):
+        self.container = container
+        self.prefix = container.template.service.env_prefix.upper()
         self.prefixed = {k: f"{self.prefix}_{v.upper()}"
                          for k, v in (data['prefixed'] if 'prefixed' in data else {}).items()}
         exported_raw = (data['exported'] if 'exported' in data else []) + ['host']
@@ -134,11 +148,15 @@ class ServiceTemplateEnv:
 
     def import_env(self, dot_path):
         [attr, var] = dot_path.split('.')
-        service_path = getattr(self.template.service, attr)
-        service = self.template.service.project.master.get_service_by_path(service_path)
+        service_path = getattr(self.container.template.service, attr)
+        service = self.container.template.service.project.master.get_service_by_path(service_path)
         if not service:
             raise Exception(f"service '{service_path}' not found")
-        exported_var = f"${{{service.template.env.exported[var]}}}" if var in service.template.env.exported else None
+        exported_var = None
+        for container in service.template.containers:
+            if var in container.env.exported:
+                exported_var = f"${{{container.env.exported[var]}}}"
+                break
         if not exported_var:
             raise Exception(f"exported var '{dot_path}' not found")
         return exported_var
@@ -152,6 +170,9 @@ class ServiceTemplateEnv:
         return (f"env:\n"
                 f"         - prefix: {self.prefix}\n{prefixed}{exported}{imported}{environment}")
 
+    def generate_compose(self, compose_service):
+        compose_service['environment'] = {**self.environment}
+
     @classmethod
     def __dict_to_str(cls, d):
         return str.join('\n', list(map(cls.__env_map, {k: f"{k}={v}" for k, v in d.items()}.values())))
@@ -161,22 +182,28 @@ class ServiceTemplateEnv:
         return f"             {e}"
 
 
-class ServiceTemplateImage:
+class ContainerTemplateImage:
     is_build: bool
     image: dict or str
 
-    def __init__(self, template, data):
-        self.template = template
+    def __init__(self, container, data):
+        self.container = container
         if 'image' in data:
             self.__as_image(data['image'])
         elif 'build' in data:
             self.__as_build(data['build'])
         else:
-            raise Exception(f"No build or image config set on template {template.name}")
+            raise Exception(f"No build or image config set on template '{container.name}'")
 
     def __str__(self):
         return (f"image(build:{self.is_build}):\n"
                 f"         - {self.image if type(self.image) is str else self.__dict_to_str(self.image)}\n")
+
+    def generate_compose(self, compose_service):
+        if self.is_build:
+            compose_service['build'] = {**self.image}
+        else:
+            compose_service['image'] = self.image
 
     @classmethod
     def __dict_to_str(cls, d):
@@ -184,7 +211,7 @@ class ServiceTemplateImage:
 
     def __as_image(self, image):
         self.is_build = False
-        self.image = f"{image['name']}:{self.template.service.parse_var(image['tag'])}"
+        self.image = f"{image['name']}:{self.container.template.service.parse_var(image['tag'])}"
         pass
 
     def __as_build(self, build):
@@ -194,14 +221,14 @@ class ServiceTemplateImage:
 
     def __process_vars(self, value):
         if type(value) is str:
-            return self.template.service.parse_var(value)
+            return self.container.template.service.parse_var(value)
         elif type(value) is dict:
             return {k: self.__process_vars(v) for k, v in value.items()}
         else:
-            raise Exception(f"invalid data type in template '{self.template.name}'")
+            raise Exception(f"invalid data type in template '{self.container.template.name}'")
 
 
-class ServiceTemplatePorts:
+class ContainerTemplatePorts:
     mapping: dict
 
     def __init__(self, template, data):
@@ -216,30 +243,42 @@ class ServiceTemplatePorts:
         pass
 
     def __str__(self):
-        ports = str.join('\n         - ', list(map(lambda e: f"  {e}", {k: f"{k}={v}" for k, v in self.mapping.items()}.values())))
+        ports = str.join('\n         - ',
+                         list(map(lambda e: f"  {e}", {k: f"{k}={v}" for k, v in self.mapping.items()}.values())))
         return f"ports:\n        {ports}"
+
+    def generate_compose(self, compose_service):
+        compose_service['ports'] = {k: f"{}:{}" for k, v in self.mapping.items()}
 
 
 class ContainerTemplate(BaseConfig):
-    image: ServiceTemplateImage
-    volumes: ServiceTemplateVolumes
-    env: ServiceTemplateEnv
-    ports: ServiceTemplatePorts
+    image: ContainerTemplateImage
+    volumes: ContainerTemplateVolumes
+    env: ContainerTemplateEnv
+    ports: ContainerTemplatePorts
 
-    def __init(self, name, template, service, data):
+    def __init__(self, name, template, data):
         super().__init__(name, data)
         self.template = template
-        self.service = service
-        self.env = ServiceTemplateEnv(self, data=self.try_get('env', {}))
-        self.image = ServiceTemplateImage(self, self._original_data)
-        self.volumes = ServiceTemplateVolumes(self, data=self.try_get('volumes', {}))
-        self.ports = ServiceTemplatePorts(self, data=self.try_get('ports', {}))
+        self.env = ContainerTemplateEnv(self, data=self.try_get('env', {}))
+        self.image = ContainerTemplateImage(self, self._original_data)
+        self.volumes = ContainerTemplateVolumes(self, data=self.try_get('volumes', {}))
+        self.ports = ContainerTemplatePorts(self, data=self.try_get('ports', {}))
 
     def __str__(self):
-        return (f"      - {self.image}"
+        return (f"     (container:{self.name})\n"
+                f"      - {self.image}"
                 f"      - {self.volumes}"
                 f"      - {self.env}"
                 f"      - {self.ports}")
+
+    def generate_compose(self, container_name, compose):
+        service = {}
+        self.image.generate_compose(service)
+        self.volumes.generate_compose(service, compose['volumes'])
+        self.env.generate_compose(service)
+        self.ports.generate_compose(service)
+        compose['services'][container_name] = service
 
 
 class ServiceTemplate(BaseConfig):
@@ -254,14 +293,24 @@ class ServiceTemplate(BaseConfig):
             raw_data = yaml.load(stream, Loader=yaml.FullLoader)
         super().__init__(name, raw_data)
         self._validate_required()
+        self.containers = []
+        for container_template_name, container_config in raw_data['containers'].items():
+            self.containers.append(ContainerTemplate(container_template_name, self, container_config))
 
     def calculate_final_env(self):
         for container in self.containers:
             container.env.calculate_final_env()
 
+    def generate_compose(self, compose):
+        num_containers = len(self.containers)
+        for container in self.containers:
+            container_name = self.service.fullname if num_containers < 2 else f"{self.service.fullname}_{container.name}"
+            container.generate_compose(container_name, compose)
+
     def __str__(self):
+        containers = '/n'.join(list(map(lambda c: str(c), self.containers)))
         return (f"{self.name}\n"
-                f"{self.containers}")
+                f"{containers}")
 
     def _validate_required(self):
         self.required = self.try_get('required', [])
@@ -293,7 +342,7 @@ class Service(BaseConfig):
         return f"service {self.name} ({self.fullname})\n    template: {self.template}"
 
     def generate_compose(self, compose):
-        pass
+        self.template.generate_compose(compose)
 
     def parse_var(self, var):
         # if its a variable
