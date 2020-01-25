@@ -54,6 +54,15 @@ class ProjectConfig:
                 project_service.generate_compose(compose, for_env)
         return compose
 
+    def get_env(self):
+        envs = []
+        for service in self.services.values():
+            envs += service.get_env()
+        for project in self.projects.values():
+            for project_service in project.services.values():
+                envs += project_service.get_env()
+        return list(dict.fromkeys(envs))
+
 
 class BaseConfig:
     name: str
@@ -349,7 +358,14 @@ class Service(BaseConfig):
     def generate_compose(self, compose, for_env):
         self.template.generate_compose(compose, for_env)
 
-    def parse_var(self, var):
+    def get_env(self) -> list:
+        envs = []
+        r = re.compile(r"\${*([A-Z_]+)}*")
+        for container in self.template.containers:
+            envs += list(map(lambda e: r.findall(e)[0], container.env.environment.values()))
+        return envs
+
+    def parse_var(self, var) -> str:
         # if its a variable
         if '%(' in var:
             regex = re.compile(r"%\((.+)\)")

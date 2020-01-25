@@ -18,10 +18,22 @@ class Config(base_command.BaseCommand):
                                                                               "generate")
         parser_docker.add_argument('-e', '--env', nargs="?", default=env.env(),
                                    help="generate docker config for specific env")
+        parser_env = subparser.add_parser('env', help="manages env configs")
 
     def process_command(self):
         getattr(self, f"_{self._args.config_command}_handler")()
 
     def _docker_handler(self):
         manager = ProjectConfigManager()
-        manager.generate_docker(self._args.print, self._args.env)
+        if self._args.generate:
+            manager.generate_docker(self._args.print, self._args.env)
+
+    def _env_handler(self):
+        base_vars = [
+            'PROJECT_PATH',
+            'PROJECT_NAME',
+        ]
+        manager = ProjectConfigManager()
+        envs = base_vars + manager.get_env()
+        for e in envs:
+            print(f"{e}: {os.environ[e] if e in os.environ else '<none>'}")

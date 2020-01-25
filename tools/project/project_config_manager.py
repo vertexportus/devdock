@@ -1,10 +1,7 @@
 import os
-import re
-import shutil
 from pprint import pp
 
 import yaml
-from dict_deep import deep_get
 
 from .project_config import ProjectConfig
 from utils import env
@@ -24,3 +21,6 @@ class ProjectConfigManager:
             pp(compose)
         with open(compose_file_path, 'w') as docker_compose_file:
             yaml.dump(compose, docker_compose_file)
+
+    def get_env(self):
+        return self._config.get_env()
