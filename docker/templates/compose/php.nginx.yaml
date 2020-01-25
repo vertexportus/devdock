@@ -1,0 +1,40 @@
+required:
+  - database
+containers:
+  php:
+    build:
+      context: build/${ENV}/php/nginx/php
+      args:
+        TAG: "%(service.version.php:1.9)-fpm-alpine"
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+        XDEBUG_ENABLE: ${%(project.name!upper)_XDEBUG_ENABLE:-$XDEBUG_ENABLE}
+        XDEBUG_REMOTE_HOST: ${XDEBUG_REMOTE_HOST}
+        XDEBUG_REMOTE_PORT: ${XDEBUG_REMOTE_PORT}
+        XDEBUG_IDEKEY: ${XDEBUG_IDEKEY}
+    volumes:
+      mapped:
+        - "%(project.path):/var/www"
+    env:
+      imported:
+        DB_USER: database.user
+        DB_PASSWORD: database.password
+        DB_PORT: database.port
+        DB_HOST: database.host
+  web:
+    build:
+      context: build/${ENV}/php/nginx/nginx
+      args:
+        TAG: "%(service.version.nginx:1.17)-alpine"
+    volumes:
+      mapped:
+        - "%(project.path):/var/www"
+    env:
+      exported:
+        - http_port
+        - https_port
+    ports:
+      8080:
+        env: http_port
+      8443:
+        env: https_port
