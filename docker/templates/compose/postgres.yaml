@@ -2,7 +2,7 @@ containers:
   postgres:
     image:
       name: postgres
-      tag: "%(service.tag:12-alpine)"
+      tag: "%(service.version:12)-alpine"
     volumes:
       named:
         data: /var/lib/postgresql/data

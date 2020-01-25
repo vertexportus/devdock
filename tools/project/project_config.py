@@ -281,7 +281,7 @@ class ContainerTemplatePorts:
         return f"ports:\n        {ports}"
 
     def generate_compose(self, compose_service):
-        compose_service['ports'] = {k: f"${{{v}:-{k}}}:{k}" for k, v in self.mapping.items()}
+        compose_service['ports'] = list({k: f"${{{v}:-{k}}}:{k}" for k, v in self.mapping.items()}.values())
 
 
 class ContainerTemplate(BaseConfig):
@@ -358,7 +358,7 @@ class Service(BaseConfig):
     project: Project
     template: ServiceTemplate
     database: str
-    tag: str
+    version: str or dict
     env_prefix: str
 
     def __init__(self, name, master, project, data):
@@ -368,7 +368,7 @@ class Service(BaseConfig):
         self.project = project
         self.env_prefix = self.try_get('env_prefix', self.fullname)
         self.database = self.try_get('database', None)
-        self.tag = self.try_get('tag', None)
+        self.version = self.try_get('version', None)
         self.template = ServiceTemplate(data['template'], self)
 
     def __str__(self):
@@ -398,6 +398,12 @@ class Service(BaseConfig):
                     [dot_path, default_val] = raw_var.split(':')
                 else:
                     dot_path = raw_var
+                # take care to allow for method transforms
+                if '!' in dot_path:
+                    [dot_path, func] = dot_path.split('!')
+                else:
+                    func = None
+                # get value
                 dot_path_split = dot_path.split('.')
                 obj = self
                 for attr_name in dot_path_split:
@@ -409,6 +415,9 @@ class Service(BaseConfig):
                         obj = None
                         break
                 val = obj
+                # run transform function if requested
+                if func and hasattr(val, func):
+                    val = getattr(val, func)()
 
                 if not val:
                     if not default_val:

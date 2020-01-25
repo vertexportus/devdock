@@ -5,7 +5,7 @@ containers:
     build:
       context: build/${ENV}/elixir/phoenix
       args:
-        TAG: "%(service.tag:1.9-alpine)"
+        TAG: "%(service.version:1.9)-alpine"
         USERID: ${USERID}
         GROUPID: ${GROUPID}
     volumes:
