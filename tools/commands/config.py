@@ -14,6 +14,8 @@ class Config(base_command.BaseCommand):
         subparser = parser_main.add_subparsers(required=True, dest="config_command", help="config sub-commands")
         parser_docker = subparser.add_parser('docker', help="generates docker config")
         parser_docker.add_argument('-g', '--generate', action="store_true", help="generate docker config")
+        parser_docker.add_argument('-p', '--print', action="store_true", help="print docker config on console on "
+                                                                              "generate")
         parser_docker.add_argument('-e', '--env', nargs="?", default=env.env(),
                                    help="generate docker config for specific env")
 
@@ -22,12 +24,4 @@ class Config(base_command.BaseCommand):
 
     def _docker_handler(self):
         manager = ProjectConfigManager()
-        # if self._args.generate:
-        #     manager.generate_docker(self._args.env)
-        #     print(blue(f"generated: {env.docker_compose_file_path(self._args.env)}"))
-        # envs = manager.get_env()
-        # for service_name, service_vars in envs.items():
-        #     print(green(f"\nService: {service_name}\n"))
-        #     for var in service_vars:
-        #         print(var)
-        # print('')
+        manager.generate_docker(self._args.print, self._args.env)

@@ -1,6 +1,7 @@
 import functools
 import os
 import re
+import shutil
 from pprint import pp
 
 import yaml
@@ -26,9 +27,6 @@ class ProjectConfig:
         for project in self.projects.values():
             for project_service in project.services.values():
                 project_service.update_references()
-        # print(self)
-        compose = self.get_compose()
-        pp(compose)
 
     def __str__(self):
         projects = functools.reduce(lambda a, b: f"{a}\n{b}", [f" -- {k}: {v}" for k, v in self.projects.items()])
@@ -41,19 +39,19 @@ class ProjectConfig:
             [project_name, service_name] = service_path.split('.')
             if project_name in self.projects:
                 project = self.projects[project_name]
-                return project.services[service_path] if service_path in project.services else None
+                return project.services[service_name] if service_name in project.services else None
             else:
                 return None
         else:
             return self.services[service_path] if service_path in self.services else None
 
-    def get_compose(self):
+    def get_compose(self, for_env):
         compose = {'services': {}, 'volumes': {}}
         for service in self.services.values():
-            service.generate_compose(compose)
+            service.generate_compose(compose, for_env)
         for project in self.projects.values():
             for project_service in project.services.values():
-                project_service.generate_compose(compose)
+                project_service.generate_compose(compose, for_env)
         return compose
 
 
@@ -103,8 +101,9 @@ class ContainerTemplateVolumes:
     def __init__(self, container, data):
         self.container = container
         self.named = {
-            f"{container.template.service.fullname}_{k}": v for k, v in (data['named'].items() if 'named' in data else {})}
-        self.mapped = list(map(lambda v: container.template.service.parse_var(v),
+            f"{container.template.service.fullname}_{k}": v
+            for k, v in (data['named'].items() if 'named' in data else {})}
+        self.mapped = list(map(lambda v: env.reverse_project_path(container.template.service.parse_var(v)),
                                data['mapped'] if 'mapped' in data else []))
 
     def __str__(self):
@@ -119,7 +118,7 @@ class ContainerTemplateVolumes:
             compose_service['volumes'] = []
         for volume_name, named_volume_config in self.named.items():
             compose_service['volumes'].append(f"{volume_name}:{named_volume_config}")
-            compose_volumes[volume_name] = ''
+            compose_volumes[volume_name] = None
         compose_service['volumes'] += self.mapped
 
 
@@ -165,7 +164,7 @@ class ContainerTemplateEnv:
         prefixed = f"         - prefixed: \n{self.__dict_to_str(self.prefixed)}\n" if len(self.prefixed) > 0 else ""
         exported = f"         - exported: \n{self.__dict_to_str(self.exported)}\n" if len(self.exported) > 0 else ""
         imported = f"         - imported: \n{self.__dict_to_str(self.imported)}\n" if len(self.imported) > 0 else ""
-        environment = f"         - environment: \n{self.__dict_to_str(self.environment)}\n"\
+        environment = f"         - environment: \n{self.__dict_to_str(self.environment)}\n" \
             if len(self.environment) > 0 else ""
         return (f"env:\n"
                 f"         - prefix: {self.prefix}\n{prefixed}{exported}{imported}{environment}")
@@ -199,9 +198,15 @@ class ContainerTemplateImage:
         return (f"image(build:{self.is_build}):\n"
                 f"         - {self.image if type(self.image) is str else self.__dict_to_str(self.image)}\n")
 
-    def generate_compose(self, compose_service):
+    def generate_compose(self, compose_service, for_env):
         if self.is_build:
+            self.image['context'] = re.sub(r"\${*ENV}*", for_env, self.image['context'])
             compose_service['build'] = {**self.image}
+            build_orig_path = env.docker_template_path(self.image['context'])
+            build_dest_path = env.docker_gen_path(self.image['context'])
+            if os.path.isdir(build_dest_path):
+                shutil.rmtree(build_dest_path)
+            shutil.copytree(build_orig_path, build_dest_path)
         else:
             compose_service['image'] = self.image
 
@@ -248,7 +253,7 @@ class ContainerTemplatePorts:
         return f"ports:\n        {ports}"
 
     def generate_compose(self, compose_service):
-        compose_service['ports'] = {k: f"{}:{}" for k, v in self.mapping.items()}
+        compose_service['ports'] = {k: f"${{{v}:-{k}}}:{k}" for k, v in self.mapping.items()}
 
 
 class ContainerTemplate(BaseConfig):
@@ -272,9 +277,9 @@ class ContainerTemplate(BaseConfig):
                 f"      - {self.env}"
                 f"      - {self.ports}")
 
-    def generate_compose(self, container_name, compose):
+    def generate_compose(self, container_name, compose, for_env):
         service = {}
-        self.image.generate_compose(service)
+        self.image.generate_compose(service, for_env)
         self.volumes.generate_compose(service, compose['volumes'])
         self.env.generate_compose(service)
         self.ports.generate_compose(service)
@@ -301,11 +306,11 @@ class ServiceTemplate(BaseConfig):
         for container in self.containers:
             container.env.calculate_final_env()
 
-    def generate_compose(self, compose):
+    def generate_compose(self, compose, for_env):
         num_containers = len(self.containers)
         for container in self.containers:
             container_name = self.service.fullname if num_containers < 2 else f"{self.service.fullname}_{container.name}"
-            container.generate_compose(container_name, compose)
+            container.generate_compose(container_name, compose, for_env)
 
     def __str__(self):
         containers = '/n'.join(list(map(lambda c: str(c), self.containers)))
@@ -341,8 +346,8 @@ class Service(BaseConfig):
     def __str__(self):
         return f"service {self.name} ({self.fullname})\n    template: {self.template}"
 
-    def generate_compose(self, compose):
-        self.template.generate_compose(compose)
+    def generate_compose(self, compose, for_env):
+        self.template.generate_compose(compose, for_env)
 
     def parse_var(self, var):
         # if its a variable

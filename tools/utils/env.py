@@ -17,6 +17,10 @@ def project_path(suffix=None) -> str:
     return os.path.abspath(f"{os.environ['PROJECT_PATH']}{'/' + suffix if suffix else ''}")
 
 
+def reverse_project_path(path) -> str:
+    return path.replace(project_path(), "${PROJECT_PATH}")
+
+
 def project_config_file_path() -> str:
     return project_path("project.yaml")
 
