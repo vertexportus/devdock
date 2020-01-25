@@ -11,6 +11,9 @@ class ProjectConfigManager:
     def __init__(self):
         self._config = ProjectConfig.load()
 
+    def get_projects(self):
+        return self._config.projects
+
     def generate_docker(self, print_console, for_env=env.env()):
         compose = self._config.get_compose(for_env)
         compose_file_path = env.docker_compose_file_path(for_env)

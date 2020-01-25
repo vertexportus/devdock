@@ -83,16 +83,35 @@ class BaseConfig:
         return self._original_data[field] if field in self._original_data else default
 
 
+class ProjectRepo:
+    base_urls = {
+        'github': {'ssh': 'git@github.com:', 'http': 'https://github.com/'}
+    }
+    url: str
+
+    def __init__(self, project, data):
+        if 'github' in data:
+            self._set_url('github', data['github'])
+        elif 'repo' in data:
+            self._set_url('repo', data['repo'])
+        else:
+            raise Exception(f"No repository configured on project {project.name}")
+
+    def _set_url(self, url_type, url):
+        self.url = f"{self.base_urls[url_type]['ssh' if env.git_use_ssh() else 'http']}{url}"\
+            if url_type in self.base_urls else url
+
+
 class Project(BaseConfig):
     master: ProjectConfig
-    repo: str
+    repo: ProjectRepo
     path: str
     services: dict
 
     def __init__(self, name, master, data):
         super().__init__(name, data)
         self.master = master
-        self.repo = self.validate_get_field('repo')
+        self.repo = ProjectRepo(self, data)
         self.path = os.path.abspath(name)
         self.services = {k: Service(k, master=self.master, project=self, data=v) for k, v in
                          data['services'].items()} if 'services' in data else {}

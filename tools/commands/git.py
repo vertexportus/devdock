@@ -29,11 +29,11 @@ class Git(base_command.BaseCommand):
         projects = ProjectConfigManager().get_projects()
         if 'all' in self._args.project:
             for project, project_config in projects.items():
-                self.__git_clone(project, project_config['repo'])
+                self.__git_clone(project, project_config.repo.url)
         else:
             project = self._args.project
             if project in projects.keys():
-                self.__git_clone(project, projects[project]['repo'])
+                self.__git_clone(project, projects[project].repo.url)
             else:
                 raise Exception(f"no configuration set for project '{self._args.project}'")
 

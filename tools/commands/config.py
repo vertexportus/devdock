@@ -19,6 +19,7 @@ class Config(base_command.BaseCommand):
         parser_docker.add_argument('-e', '--env', nargs="?", default=env.env(),
                                    help="generate docker config for specific env")
         parser_env = subparser.add_parser('env', help="manages env configs")
+        parser_env.add_argument('-g', '--generate', action="store_true", help="generate/update env files")
 
     def process_command(self):
         getattr(self, f"_{self._args.config_command}_handler")()
@@ -32,6 +33,7 @@ class Config(base_command.BaseCommand):
         base_vars = [
             'PROJECT_PATH',
             'PROJECT_NAME',
+            'GIT_USE_SSH',
         ]
         manager = ProjectConfigManager()
         envs = base_vars + manager.get_env()
