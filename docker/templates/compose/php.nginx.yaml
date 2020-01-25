@@ -5,7 +5,7 @@ containers:
     build:
       context: build/${ENV}/php/nginx/php
       args:
-        TAG: "%(service.version.php:1.9)-fpm-alpine"
+        TAG: "%(service.version.php:7.4)-fpm-alpine"
         USERID: ${USERID}
         GROUPID: ${GROUPID}
         XDEBUG_ENABLE: ${%(project.name!upper)_XDEBUG_ENABLE:-${XDEBUG_ENABLE:-0}}
