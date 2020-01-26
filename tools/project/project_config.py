@@ -198,7 +198,8 @@ class ContainerTemplateEnv:
                 f"         - prefix: {self.prefix}\n{prefixed}{exported}{imported}{environment}")
 
     def generate_compose(self, compose_service):
-        compose_service['environment'] = {**self.environment}
+        if len(self.environment):
+            compose_service['environment'] = {**self.environment}
 
     @classmethod
     def __dict_to_str(cls, d):
@@ -281,7 +282,8 @@ class ContainerTemplatePorts:
         return f"ports:\n        {ports}"
 
     def generate_compose(self, compose_service):
-        compose_service['ports'] = list({k: f"${{{v}:-{k}}}:{k}" for k, v in self.mapping.items()}.values())
+        if len(self.mapping) > 1:
+            compose_service['ports'] = list({k: f"${{{v}:-{k}}}:{k}" for k, v in self.mapping.items()}.values())
 
 
 class ContainerTemplate(BaseConfig):
