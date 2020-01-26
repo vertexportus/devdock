@@ -98,7 +98,7 @@ class ProjectRepo:
             raise Exception(f"No repository configured on project {project.name}")
 
     def _set_url(self, url_type, url):
-        self.url = f"{self.base_urls[url_type]['ssh' if env.git_use_ssh() else 'http']}{url}"\
+        self.url = f"{self.base_urls[url_type]['ssh' if env.git_use_ssh() else 'http']}{url}" \
             if url_type in self.base_urls else url
 
 
@@ -180,7 +180,7 @@ class ContainerTemplateEnv:
         if not service:
             raise Exception(f"service '{service_path}' not found")
         exported_var = None
-        for container in service.template.containers:
+        for container in service.template.containers.values():
             if var in container.env.exported:
                 exported_var = f"${{{container.env.exported[var]}}}"
                 break
@@ -285,14 +285,18 @@ class ContainerTemplatePorts:
 
 
 class ContainerTemplate(BaseConfig):
+    fullname: str
     image: ContainerTemplateImage
     volumes: ContainerTemplateVolumes
     env: ContainerTemplateEnv
     ports: ContainerTemplatePorts
+    depends_on: list
 
     def __init__(self, name, template, data):
         super().__init__(name, data)
         self.template = template
+        self.fullname = self.template.service.fullname \
+            if self.template.has_single_container else f"{self.template.service.fullname}_{name}"
         self.env = ContainerTemplateEnv(self, data=self.try_get('env', {}))
         self.image = ContainerTemplateImage(self, self._original_data)
         self.volumes = ContainerTemplateVolumes(self, data=self.try_get('volumes', {}))
@@ -305,19 +309,35 @@ class ContainerTemplate(BaseConfig):
                 f"      - {self.env}"
                 f"      - {self.ports}")
 
-    def generate_compose(self, container_name, compose, for_env):
+    def calculate_final_env(self):
+        self.env.calculate_final_env()
+
+    def update_dependencies(self):
+        self.depends_on = list(map(lambda x: self.__get_sibling_fullname(x), self.try_get('depends_on', [])))
+        self.depends_on += self.template.service.get_container_dependencies()
+
+    def generate_compose(self, compose, for_env):
         service = {}
         self.image.generate_compose(service, for_env)
         self.volumes.generate_compose(service, compose['volumes'])
         self.env.generate_compose(service)
         self.ports.generate_compose(service)
-        compose['services'][container_name] = service
+        if len(self.depends_on) > 0:
+            service['depends_on'] = self.depends_on
+        compose['services'][self.fullname] = service
+
+    def __get_sibling_fullname(self, container_name):
+        if container_name in self.template.containers:
+            return self.template.containers[container_name].fullname
+        else:
+            raise Exception(f"sibling container '{container_name}' not found in template '{self.template.name}'")
 
 
 class ServiceTemplate(BaseConfig):
     file_path: str
     required: list
-    containers: list
+    containers: dict
+    has_single_container: bool
 
     def __init__(self, name, service):
         self.service = service
@@ -326,22 +346,20 @@ class ServiceTemplate(BaseConfig):
             raw_data = yaml.load(stream, Loader=yaml.FullLoader)
         super().__init__(name, raw_data)
         self._validate_required()
-        self.containers = []
-        for container_template_name, container_config in raw_data['containers'].items():
-            self.containers.append(ContainerTemplate(container_template_name, self, container_config))
+        self.has_single_container = len(raw_data['containers']) < 2
+        self.containers = {k: ContainerTemplate(k, self, v) for k, v in raw_data['containers'].items()}
 
-    def calculate_final_env(self):
-        for container in self.containers:
-            container.env.calculate_final_env()
+    def update_references(self):
+        for container in self.containers.values():
+            container.update_dependencies()
+            container.calculate_final_env()
 
     def generate_compose(self, compose, for_env):
-        num_containers = len(self.containers)
-        for container in self.containers:
-            container_name = self.service.fullname if num_containers < 2 else f"{self.service.fullname}_{container.name}"
-            container.generate_compose(container_name, compose, for_env)
+        for container in self.containers.values():
+            container.generate_compose(compose, for_env)
 
     def __str__(self):
-        containers = '/n'.join(list(map(lambda c: str(c), self.containers)))
+        containers = '/n'.join(list(map(lambda c: str(c), self.containers.values())))
         return (f"{self.name}\n"
                 f"{containers}")
 
@@ -383,6 +401,15 @@ class Service(BaseConfig):
         for container in self.template.containers:
             envs += list(map(lambda e: r.findall(e)[0], container.env.environment.values()))
         return envs
+
+    def get_container_dependencies(self):
+        dependencies = []
+        if self.database:
+            service = self.master.get_service_by_path(self.database)
+            if service:
+                for service_container in service.template.containers.values():
+                    dependencies.append(service_container.fullname)
+        return dependencies
 
     def parse_var(self, var) -> str:
         # if its a variable
@@ -435,4 +462,4 @@ class Service(BaseConfig):
             return var
 
     def update_references(self):
-        self.template.calculate_final_env()
+        self.template.update_references()

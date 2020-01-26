@@ -3,7 +3,8 @@ required:
 containers:
   php:
     build:
-      context: build/${ENV}/php/nginx/php
+      context: build/${ENV}/php/nginx
+      dockerfile: php.Dockerfile
       args:
         TAG: "%(service.version.php:7.4)-fpm-alpine"
         USERID: ${USERID}
@@ -23,12 +24,15 @@ containers:
         DB_HOST: database.host
   web:
     build:
-      context: build/${ENV}/php/nginx/nginx
+      context: build/${ENV}/php/nginx
+      dockerfile: nginx.Dockerfile
       args:
         TAG: "%(service.version.nginx:1.17)-alpine"
     volumes:
       mapped:
         - "%(project.path):/var/www"
+    depends_on:
+      - php
     env:
       exported:
         - http_port
