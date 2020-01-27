@@ -381,6 +381,10 @@ class Service(BaseConfig):
     version: str or dict
     env_prefix: str
 
+    @property
+    def containers(self):
+        return self.template.containers
+
     def __init__(self, name, master, project, data):
         super().__init__(name, data)
         self.fullname = name

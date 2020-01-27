@@ -25,5 +25,8 @@ class ProjectConfigManager:
         with open(compose_file_path, 'w') as docker_compose_file:
             yaml.dump(compose, docker_compose_file)
 
+    def get_service_by_path(self, service_path):
+        return self._config.get_service_by_path(service_path)
+
     def get_env(self):
         return self._config.get_env()
