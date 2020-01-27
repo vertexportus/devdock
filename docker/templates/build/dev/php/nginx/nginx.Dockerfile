@@ -4,6 +4,7 @@ ARG TAG
 RUN echo "building image from nginx:$TAG"
 
 # nginx conf
+RUN set -x && rm -f /etc/nginx/conf.d/default.confs
 COPY config/nginx-php.conf /etc/nginx/conf.d/phpupstream.conf
 COPY config/nginx-site.conf /etc/nginx/sites-available/default.conf
 COPY config/nginx.conf /etc/nginx/nginx.conf
