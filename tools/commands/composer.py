@@ -13,7 +13,7 @@ class Composer(base_command.BaseCommand):
 
     def process_command(self):
         if self.args.project:
-            project = self.project_config.get_projects_by_name(self.args.project)
+            project = self.project_config.get_project_by_name(self.args.project)
             if not project:
                 raise Exception(f"project '{self.args.project}' does not exist")
             if 'php' not in project.tech_stack:
