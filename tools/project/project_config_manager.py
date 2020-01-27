@@ -55,3 +55,15 @@ class ProjectConfigManager:
 
     def get_env(self):
         return self._config.get_env()
+
+    def is_tech_in_use(self, tech):
+        for project in self._config.projects.values():
+            if tech in project.tech_stack:
+                return True
+        return False
+
+    def get_projects_by_tech(self, tech):
+        return list(filter(lambda x: tech in x.tech_stack, self._config.projects.values()))
+
+    def get_project_by_name(self, name):
+        return self._config.projects[name] if name in self._config.projects else None

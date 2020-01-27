@@ -1,5 +1,4 @@
 from commands import base_command
-from project import ProjectConfigManager
 
 
 class Shell(base_command.BaseCommand):
@@ -9,8 +8,8 @@ class Shell(base_command.BaseCommand):
         parser_main.add_argument('container', help="container to run shell in")
 
     def process_command(self):
-        container = ProjectConfigManager().get_container_name_by_simple_path(self._args.container)
+        container = self.project_config.get_container_name_by_simple_path(self.args.container)
         if not container:
-            raise Exception(f"container related to path '{self._args.container}' not found")
+            raise Exception(f"container related to path '{self.args.container}' not found")
         self.run_shell(
             f"docker-compose exec {container} sh -c \"which bash > /dev/null 2>&1 && bash || sh\"")

@@ -2,7 +2,6 @@ import os
 import argparse
 from commands import base_command
 from utils import env
-from project import ProjectConfigManager
 import utils.colors
 
 
@@ -37,23 +36,23 @@ class Docker(base_command.BaseCommand):
         parser_logs.add_argument('-f', '--follow', action="store_true", help="follow log output")
 
     def process_command(self):
-        getattr(self, f"_{self._args.sub_command}_handler")()
+        getattr(self, f"_{self.args.sub_command}_handler")()
 
     def _up_handler(self):
-        if self._args.generate:
+        if self.args.generate:
             print(utils.colors.blue("generating docker config..."))
-            ProjectConfigManager().generate_docker(False)
+            self.project_config.generate_docker(False)
         else:
             self._check_docker_config(gen=True)
-        if self._args.rebuild:
+        if self.args.rebuild:
             self.run_shell("docker-compose down")
             self.run_shell("docker-compose build --no-cache")
-        up_args = f"--remove-orphans {'' if self._args.attach else '-d'} {'--build' if self._args.build else ''}"
+        up_args = f"--remove-orphans {'' if self.args.attach else '-d'} {'--build' if self.args.build else ''}"
         self.run_shell(f"docker-compose up {up_args}")
 
     def _down_handler(self):
         self._check_docker_config()
-        down_args = ' '.join(self._args.params) if len(self._args.params) > 0 else '--remove-orphans'
+        down_args = ' '.join(self.args.params) if len(self.args.params) > 0 else '--remove-orphans'
         self.run_shell(f"docker-compose down {down_args}")
 
     def _destroy_handler(self):
@@ -66,26 +65,24 @@ class Docker(base_command.BaseCommand):
 
     def _exec_handler(self):
         self._check_docker_config()
-        container = self.__get_container_name(self._args.container)
-        exec_args = f"{self._args.exec_command} {' '.join(self._args.params) if len(self._args.params) else ''}"
+        container = self.__get_container_name(self.args.container)
+        exec_args = f"{self.args.exec_command} {' '.join(self.args.params) if len(self.args.params) else ''}"
         self.run_shell(f"docker-compose exec {container} {exec_args}")
 
     def _logs_handler(self):
         self._check_docker_config()
-        container = self.__get_container_name(self._args.container) if self._args.container != 'all' else ''
-        self.run_shell(f"docker-compose logs {'-f' if self._args.follow else ''} {container}")
+        container = self.__get_container_name(self.args.container) if self.args.container != 'all' else ''
+        self.run_shell(f"docker-compose logs {'-f' if self.args.follow else ''} {container}")
 
-    @staticmethod
-    def _check_docker_config(gen=False):
+    def _check_docker_config(self, gen=False):
         if not os.path.isfile(env.docker_compose_file_path()):
             if gen:
-                ProjectConfigManager().generate_docker(False)
+                self.project_config.generate_docker(False)
             else:
                 raise Exception(f"no docker-compose file generated yet for current ENV ({env.env()})")
 
-    @staticmethod
-    def __get_container_name(path):
-        container = ProjectConfigManager().get_container_name_by_simple_path(path)
+    def __get_container_name(self, path):
+        container = self.project_config.get_container_name_by_simple_path(path)
         if not container:
             raise Exception(f"container related to path '{path}' not found")
         return container

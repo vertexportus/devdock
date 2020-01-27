@@ -2,6 +2,8 @@ required:
   - database
 containers:
   php:
+    stack:
+      - php
     build:
       context: build/${ENV}/php/nginx
       dockerfile: php.Dockerfile
@@ -24,6 +26,9 @@ containers:
         DB_PORT: database.port
         DB_HOST: database.host
   web:
+    stack:
+      - http
+      - nginx
     build:
       context: build/${ENV}/php/nginx
       dockerfile: nginx.Dockerfile

@@ -14,6 +14,7 @@ class ServiceData(BaseConfig):
     database: str
     version: str or dict
     env_prefix: str
+    tech_stack: list
 
     @property
     def containers(self):
@@ -24,9 +25,15 @@ class ServiceData(BaseConfig):
         self.fullname = name
         self.master = master
         self.project = project
+        self.tech_stack = []
 
     def __str__(self):
         return f"service {self.name} ({self.fullname})\n    template: {self.template}"
+
+    def append_to_tech_stack(self, stack):
+        self.tech_stack += stack
+        if self.project and len(self.tech_stack) > 0:
+            self.project.append_to_tech_stack(stack)
 
     def parse_var(self, var) -> str:
         # if its a variable

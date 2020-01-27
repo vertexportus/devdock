@@ -10,11 +10,20 @@ from utils import env
 
 class BaseCommand(ABC):
     @classmethod
-    def create_instance(cls, args):
-        return cls(args)
+    def create_instance(cls, project_config_manager, args):
+        return cls(project_config_manager, args)
 
-    def __init__(self, args):
-        self._args = args
+    @property
+    def project_config(self):
+        return self.__project_config_manager
+
+    @property
+    def args(self):
+        return self.__args
+
+    def __init__(self, project_config_manager, args):
+        self.__project_config_manager = project_config_manager
+        self.__args = args
 
     @abstractmethod
     def process_command(self):

@@ -2,6 +2,10 @@ required:
   - database
 containers:
   elixir_phoenix:
+    stack:
+      - http
+      - elixir
+      - phoenix-framework
     build:
       context: build/${ENV}/elixir/phoenix
       args:

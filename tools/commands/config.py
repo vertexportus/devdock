@@ -1,10 +1,6 @@
 import os
-import shutil
-from git import Repo, RemoteProgress
 from commands import base_command
 from utils import env
-from utils.colors import *
-from project import ProjectConfigManager
 
 
 class Config(base_command.BaseCommand):
@@ -22,12 +18,11 @@ class Config(base_command.BaseCommand):
         parser_env.add_argument('-g', '--generate', action="store_true", help="generate/update env files")
 
     def process_command(self):
-        getattr(self, f"_{self._args.config_command}_handler")()
+        getattr(self, f"_{self.args.config_command}_handler")()
 
     def _docker_handler(self):
-        manager = ProjectConfigManager()
-        if self._args.generate:
-            manager.generate_docker(self._args.print, self._args.env)
+        if self.args.generate:
+            self.project_config.generate_docker(self.args.print, self.args.env)
 
     def _env_handler(self):
         base_vars = [
@@ -35,7 +30,6 @@ class Config(base_command.BaseCommand):
             'PROJECT_NAME',
             'GIT_USE_SSH',
         ]
-        manager = ProjectConfigManager()
-        envs = base_vars + manager.get_env()
+        envs = base_vars + self.project_config.get_env()
         for e in envs:
             print(f"{e}: {os.environ[e] if e in os.environ else '<none>'}")

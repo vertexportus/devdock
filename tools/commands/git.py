@@ -1,8 +1,7 @@
 import argparse
 import git
 from git import Repo
-from utils import env, GitProgress
-from project import ProjectConfigManager
+from utils import GitProgress
 from utils.colors import *
 from commands import base_command
 
@@ -19,26 +18,26 @@ class Git(base_command.BaseCommand):
                                  help='additional arguments passed directly into git command')
 
     def process_command(self):
-        method_name = f"_{self._args.git_command}_handler"
+        method_name = f"_{self.args.git_command}_handler"
         if hasattr(self, method_name):
             getattr(self, method_name)()
         else:
             self._default_handler()
 
     def _clone_handler(self):
-        projects = ProjectConfigManager().get_projects()
-        if 'all' in self._args.project:
+        projects = self.project_config.get_projects()
+        if 'all' in self.args.project:
             for project, project_config in projects.items():
                 self.__git_clone(project, project_config.repo.url)
         else:
-            project = self._args.project
+            project = self.args.project
             if project in projects.keys():
                 self.__git_clone(project, projects[project].repo.url)
             else:
-                raise Exception(f"no configuration set for project '{self._args.project}'")
+                raise Exception(f"no configuration set for project '{self.args.project}'")
 
     def _default_handler(self):
-        raise Exception(f"command '{self._args.git_command}' not supported")
+        raise Exception(f"command '{self.args.git_command}' not supported")
 
     @staticmethod
     def __git_clone(project, repo_url):

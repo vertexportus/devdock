@@ -5,14 +5,16 @@ import inspect
 import importlib
 import traceback
 import utils.colors
+from project import ProjectConfigManager
 from utils import env, ColoredArgumentParser
 
 
 command_modules = {
-    "docker",
-    "shell",
-    "git",
-    "config",
+    "docker": None,
+    "shell": None,
+    "git": None,
+    "config": None,
+    "composer": 'php'
 }
 
 
@@ -25,12 +27,15 @@ def cli():
 
     # parse additional modules
     parser_classes = dict()
-    for command in command_modules:
+    project_config_manager = ProjectConfigManager()
+    for command, command_tech_stack in command_modules.items():
         class_ref = None
+        if command_tech_stack and not project_config_manager.is_tech_in_use(command_tech_stack):
+            continue
         module = importlib.import_module(f"commands.{command}")
         classes = inspect.getmembers(module, inspect.isclass)
         if len(classes) < 1:
-            print(utils.colors.red(f"module commands.{command} contains no classes - this is ilegal"))
+            print(utils.colors.red(f"module commands.{command} contains no classes - this is illegal"))
             exit(1)
         for class_inspect in classes:
             class_name = class_inspect[0]
@@ -49,7 +54,7 @@ def cli():
     args = parser.parse_args()
     global verbose
     verbose = args.verbose
-    command = parser_classes[args.command](args)
+    command = parser_classes[args.command](project_config_manager, args)
     command.process_command()
 
 

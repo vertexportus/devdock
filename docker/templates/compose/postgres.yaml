@@ -1,5 +1,8 @@
 containers:
   postgres:
+    stack:
+      - sql
+      - postgres
     image:
       name: postgres
       tag: "%(service.version:12)-alpine"

@@ -12,10 +12,14 @@ class ContainerTemplateData(BaseConfig):
     env: ContainerTemplateEnv
     ports: ContainerTemplatePorts
     depends_on: list
+    tech_stack: list
 
     def __init__(self, name, template, data):
         super().__init__(name, data)
         self.template = template
+        self.tech_stack = self.try_get('stack', [])
+        if len(self.tech_stack) > 0:
+            self.template.service.append_to_tech_stack(self.tech_stack)
 
     def __str__(self):
         return (f"     (container:{self.name})\n"
