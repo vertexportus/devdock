@@ -5,11 +5,16 @@ import shutil
 from pprint import pp
 
 import yaml
+from dict_deep import deep_get
 
 from utils import env
 
 
 class ProjectConfig:
+    MINIMUM_DOCKER_COMPOSE_VERSION = 3.0
+    AUTO_DOCKER_COMPOSE_VERSION = 3.7
+
+    docker: dict
     projects: dict
     services: dict
 
@@ -19,6 +24,7 @@ class ProjectConfig:
             return cls(yaml.load(stream, Loader=yaml.FullLoader))
 
     def __init__(self, data):
+        self.docker = data['docker'] if 'docker' in data else {}
         self.projects = {k: Project(k, master=self, data=v) for k, v in data['projects'].items()}
         self.services = {k: Service(k, master=self, project=None, data=v) for k, v in
                          data['services'].items()} if 'services' in data else {}
@@ -46,7 +52,15 @@ class ProjectConfig:
             return self.services[service_path] if service_path in self.services else None
 
     def get_compose(self, for_env):
-        compose = {'version': '3.7', 'services': {}, 'volumes': {}}
+        compose_version = deep_get(self.docker, 'compose.version')
+        if compose_version and float(compose_version) < self.MINIMUM_DOCKER_COMPOSE_VERSION:
+            raise Exception(f"devdock requires at least version {self.MINIMUM_DOCKER_COMPOSE_VERSION} "
+                            f"for docker-compose format")
+        compose = {
+            'version': compose_version if compose_version else str(self.AUTO_DOCKER_COMPOSE_VERSION),
+            'services': {},
+            'volumes': {}
+        }
         for service in self.services.values():
             service.generate_compose(compose, for_env)
         for project in self.projects.values():

@@ -39,7 +39,7 @@ containers:
         - http_port
         - https_port
     ports:
-      8080:
+      80:
         env: http_port
-      8443:
+      443:
         env: https_port
