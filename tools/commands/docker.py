@@ -66,18 +66,26 @@ class Docker(base_command.BaseCommand):
 
     def _exec_handler(self):
         self._check_docker_config()
+        container = self.__get_container_name(self._args.container)
         exec_args = f"{self._args.exec_command} {' '.join(self._args.params) if len(self._args.params) else ''}"
-        self.run_shell(f"docker-compose exec {self._args.container} {exec_args}")
+        self.run_shell(f"docker-compose exec {container} {exec_args}")
 
     def _logs_handler(self):
         self._check_docker_config()
-        logs_args = f"{self._args.container if self._args.container != 'all' else ''} {'-f' if self._args.follow else ''}"
+        container = self.__get_container_name(self._args.container) if self._args.container != 'all' else ''
+        logs_args = f"{container} {'-f' if self._args.follow else ''}"
         self.run_shell(f"docker-compose logs {logs_args}")
 
     @staticmethod
     def _check_docker_config(gen=False):
         if not os.path.isfile(env.docker_compose_file_path()):
             if gen:
-                ProjectConfigManager().generate_docker()
+                ProjectConfigManager().generate_docker(False)
             else:
                 raise Exception(f"no docker-compose file generated yet for current ENV ({env.env()})")
+
+    @staticmethod
+    def __get_container_name(path):
+        container = ProjectConfigManager().get_container_name_by_simple_path(path)
+        if not container:
+            raise Exception(f"container related to path '{path}' not found")
