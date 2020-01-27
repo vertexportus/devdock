@@ -12,8 +12,8 @@ containers:
         XDEBUG_ENABLE: ${%(project.name!upper)_XDEBUG_ENABLE:-${XDEBUG_ENABLE:-0}}
         XDEBUG_VERSION: ${%(project.name!upper)_XDEBUG_VERSION:-${XDEBUG_VERSION:-2.8.1}}
         XDEBUG_REMOTE_HOST: ${XDEBUG_REMOTE_HOST}
-        XDEBUG_REMOTE_PORT: ${XDEBUG_REMOTE_PORT}
-        XDEBUG_IDEKEY: ${XDEBUG_IDEKEY}
+        XDEBUG_REMOTE_PORT: ${XDEBUG_REMOTE_PORT:-""}
+        XDEBUG_IDEKEY: ${XDEBUG_IDEKEY:-""}
     volumes:
       mapped:
         - "%(project.path):/var/www"
@@ -29,6 +29,8 @@ containers:
       dockerfile: nginx.Dockerfile
       args:
         TAG: "%(service.version.nginx:1.17)-alpine"
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
     volumes:
       mapped:
         - "%(project.path):/var/www"

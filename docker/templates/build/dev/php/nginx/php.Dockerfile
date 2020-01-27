@@ -3,16 +3,18 @@ FROM php:$TAG
 ARG TAG
 RUN echo "building image from php:$TAG"
 
-# user/group
-ARG USERID
-ARG GROUPID
-RUN addgroup -S --gid $GROUPID php && adduser -S -D --uid $USERID -G php php
-
 # dependencies
 ARG APK_DEPS=""
 RUN set -x \
     && apk --update --no-cache add $APK_DEPS \
-    && apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS
+    && apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS shadow
+
+# user/group
+ARG USERID
+ARG GROUPID
+RUN usermod -u $USERID www-data
+RUN groupmod -g $GROUPID www-data
+#RUN addgroup -S --gid $GROUPID php && adduser -S -D --uid $USERID -G php php
 
 # extensions
 ARG PHP_EXT="none"
@@ -34,7 +36,7 @@ RUN set -x && if [ $XDEBUG_ENABLE -ne 0 ]; then echo -e $XDEBUG_CONFIG >> /usr/l
 RUN set -x && apk del .phpize-deps
 
 # finalize and run
-USER php
+#USER php
 WORKDIR /var/www
 EXPOSE 9000
 CMD ["php-fpm"]

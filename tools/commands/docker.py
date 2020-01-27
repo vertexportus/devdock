@@ -73,8 +73,7 @@ class Docker(base_command.BaseCommand):
     def _logs_handler(self):
         self._check_docker_config()
         container = self.__get_container_name(self._args.container) if self._args.container != 'all' else ''
-        logs_args = f"{container} {'-f' if self._args.follow else ''}"
-        self.run_shell(f"docker-compose logs {logs_args}")
+        self.run_shell(f"docker-compose logs {'-f' if self._args.follow else ''} {container}")
 
     @staticmethod
     def _check_docker_config(gen=False):
@@ -89,3 +88,4 @@ class Docker(base_command.BaseCommand):
         container = ProjectConfigManager().get_container_name_by_simple_path(path)
         if not container:
             raise Exception(f"container related to path '{path}' not found")
+        return container
