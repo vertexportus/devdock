@@ -10,13 +10,13 @@ class Docker(base_command.BaseCommand):
     @staticmethod
     def argparse(parser, subparsers):
         parser_main = subparsers.add_parser('docker', help="runs pre-defined docker or docker-compose commands")
-        parser_main.add_argument('-g', '--generate', action="store_true", help="generate docker config")
         subparser = parser_main.add_subparsers(required=True, dest="sub_command", help="Docker sub commands")
         # docker up
         parser_up = subparser.add_parser('up', help="starts containers")
         parser_up.add_argument('-a', '--attach', action="store_true", help="attach to docker-compose process")
         parser_up.add_argument('--build', action="store_true", help="builds containers if Dockerfiles have changed")
         parser_up.add_argument('--rebuild', action="store_true", help="forces a rebuild of all container images")
+        parser_up.add_argument('-g', '--generate', action="store_true", help="generate docker config")
         # docker down
         parser_down = subparser.add_parser('down', help="stops containers")
         parser_down.add_argument('params', nargs=argparse.REMAINDER,
