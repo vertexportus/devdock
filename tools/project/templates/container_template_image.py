@@ -1,7 +1,6 @@
 import os
 import re
 import shutil
-from pprint import pp
 
 from utils import env
 
@@ -35,11 +34,13 @@ class ContainerTemplateImage:
                 context = regex.sub(for_env, image['context'])
             image['context'] = context
             compose_service['build'] = image
+            # copy base build context structure
             build_orig_path = env.docker_template_path(context)
             build_dest_path = env.docker_gen_path(context)
             if os.path.isdir(build_dest_path):
                 shutil.rmtree(build_dest_path)
             shutil.copytree(build_orig_path, build_dest_path)
+            # do overrides if requested
             for override_context in overrides:
                 override_orig_path = env.docker_template_path(override_context)
                 if not os.path.isdir(override_orig_path):
