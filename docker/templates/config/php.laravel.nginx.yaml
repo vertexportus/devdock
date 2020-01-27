@@ -1,0 +1,8 @@
+inherits: php.nginx
+containers:
+  php:
+    stack:
+      - laravel
+  web:
+    build:
+      context: ['build/${ENV}/php/nginx/web', 'build/${ENV}/php/laravel/web']

@@ -14,7 +14,8 @@ command_modules = {
     "shell": None,
     "git": None,
     "config": None,
-    "composer": 'php'
+    "composer": 'php',
+    "artisan": 'laravel'
 }
 
 

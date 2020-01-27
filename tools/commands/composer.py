@@ -1,7 +1,6 @@
 import argparse
 
 from commands import base_command
-from utils import env
 
 
 class Composer(base_command.BaseCommand):
