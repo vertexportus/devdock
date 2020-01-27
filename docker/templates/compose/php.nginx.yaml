@@ -10,6 +10,7 @@ containers:
         USERID: ${USERID}
         GROUPID: ${GROUPID}
         XDEBUG_ENABLE: ${%(project.name!upper)_XDEBUG_ENABLE:-${XDEBUG_ENABLE:-0}}
+        XDEBUG_VERSION: ${%(project.name!upper)_XDEBUG_VERSION:-${XDEBUG_VERSION:-2.8.1}}
         XDEBUG_REMOTE_HOST: ${XDEBUG_REMOTE_HOST}
         XDEBUG_REMOTE_PORT: ${XDEBUG_REMOTE_PORT}
         XDEBUG_IDEKEY: ${XDEBUG_IDEKEY}

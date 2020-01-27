@@ -42,7 +42,7 @@ class Docker(base_command.BaseCommand):
     def _up_handler(self):
         if self._args.generate:
             print(utils.colors.blue("generating docker config..."))
-            ProjectConfigManager().generate_docker()
+            ProjectConfigManager().generate_docker(False)
         else:
             self._check_docker_config(gen=True)
         if self._args.rebuild:

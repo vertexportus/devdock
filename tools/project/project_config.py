@@ -46,7 +46,7 @@ class ProjectConfig:
             return self.services[service_path] if service_path in self.services else None
 
     def get_compose(self, for_env):
-        compose = {'services': {}, 'volumes': {}}
+        compose = {'version': '3.7', 'services': {}, 'volumes': {}}
         for service in self.services.values():
             service.generate_compose(compose, for_env)
         for project in self.projects.values():
@@ -400,7 +400,7 @@ class Service(BaseConfig):
     def get_env(self) -> list:
         envs = []
         r = re.compile(r"\${*([A-Z_]+)}*")
-        for container in self.template.containers:
+        for container in self.template.containers.values():
             envs += list(map(lambda e: r.findall(e)[0], container.env.environment.values()))
         return envs
 
