@@ -11,6 +11,7 @@ class Service(ServiceData):
         self.env_files = self.try_get('env_files', False)
         self.database = self.try_get('database', None)
         self.version = self.try_get('version', None)
+        self.ports = self.try_get('ports', False)
         self.template = ServiceTemplate(data['template'], service=self)
 
     def generate_compose(self, compose, for_env):

@@ -24,5 +24,6 @@ containers:
       exported:
         - port
     ports:
-      4000:
+      http_port:
+        default: 4000
         env: port

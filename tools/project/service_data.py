@@ -13,6 +13,7 @@ class ServiceData(BaseConfig):
     template: ServiceTemplate
     database: str
     version: str or dict
+    ports: bool or list
     env_prefix: str
     env_files: bool or list
     tech_stack: list

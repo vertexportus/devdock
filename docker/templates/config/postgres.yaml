@@ -20,5 +20,6 @@ containers:
         - database
         - port
     ports:
-      5432:
+      db_port:
+        default: 5432
         env: port
