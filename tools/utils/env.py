@@ -25,6 +25,10 @@ def project_config_file_path() -> str:
     return project_path("project.yaml")
 
 
+def env_template_path(path) -> str:
+    return project_path(f"devdock/env/{path}")
+
+
 def docker_template_path(suffix=None) -> str:
     return project_path(f"devdock/docker/templates{'/' + suffix if suffix else ''}")
 

@@ -1,4 +1,6 @@
 import os
+import shutil
+
 from commands import base_command
 from utils import env
 
@@ -31,5 +33,9 @@ class Config(base_command.BaseCommand):
             'GIT_USE_SSH',
         ]
         envs = base_vars + self.project_config.get_env()
+        envrc_file_path = env.project_path(".envrc")
+        if self.args.generate or not os.path.exists(envrc_file_path):
+            shutil.copy(env.env_template_path("direnv"), envrc_file_path)
+            self.run_shell("direnv allow")
         for e in envs:
             print(f"{e}: {os.environ[e] if e in os.environ else '<none>'}")
