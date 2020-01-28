@@ -5,22 +5,19 @@ Set of tools to help manage a docker-oriented development environment
 
 ```
 projects:
-  api:
-    repo: git@github.com:vertexportus/moneycloud-api.git
+  laravel:
+    github: username/laravel.git
     services:
-      api:
-        template: elixir.phoenix
+      laravel:
+        template: php.laravel.nginx
+        database: db
+        ports:
+          - http_port
+        env_files: true
 
 services:
   db:
     template: postgres
-    ports: true
-    env_map:
-      user: $DB_USER
-      password: $DB_PASSWORD
-      database: $DB_NAME
-      port: ${DB_PORT:-5432}
-
 ```
 ## temp .envrc
 
