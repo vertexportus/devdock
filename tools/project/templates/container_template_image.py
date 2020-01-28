@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 
+from project.generation import generate_build_files
 from utils import env
 
 
@@ -26,37 +27,15 @@ class ContainerTemplateImage:
         if self.is_build:
             regex = re.compile(r"\${*ENV}*")
             image = {**self.image}
-            overrides = []
-            if type(image['context']) is list:
-                context = regex.sub(for_env, image['context'][0])
-                overrides = list(map(lambda x: regex.sub(for_env, x), image['context'][1:]))
-            else:
-                context = regex.sub(for_env, image['context'])
-            image['context'] = context
+            image_context = image['context']
+            contexts = list(map(lambda x: regex.sub(for_env, x), image_context))\
+                if type(image_context) is list else [regex.sub(for_env, image_context)]
+            image['context'] = contexts[0]
             compose_service['build'] = image
-            # copy base build context structure
-            build_orig_path = env.docker_template_path(context)
-            build_dest_path = env.docker_gen_path(context)
-            if os.path.isdir(build_dest_path):
-                shutil.rmtree(build_dest_path)
-            shutil.copytree(build_orig_path, build_dest_path)
-            # do overrides if requested
-            for override_context in overrides:
-                override_orig_path = env.docker_template_path(override_context)
-                if not os.path.isdir(override_orig_path):
-                    continue
-                for src_dir, dirs, files in os.walk(override_orig_path):
-                    dest_dir = src_dir.replace(override_orig_path, build_dest_path, 1)
-                    if not os.path.exists(dest_dir):
-                        os.makedirs(dest_dir)
-                    for file_name in files:
-                        src_file = os.path.join(src_dir, file_name)
-                        dest_file = os.path.join(dest_dir, file_name)
-                        if os.path.exists(dest_file):
-                            if os.path.samefile(src_file, dest_file):
-                                continue
-                            os.remove(dest_file)
-                        shutil.copy(src_file, dest_file)
+            generate_build_files(contexts, contexts[0], {
+                'container': self.container,
+                'siblings': self.container.template.containers
+            })
         else:
             compose_service['image'] = self.image
 
