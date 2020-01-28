@@ -1,3 +1,4 @@
+from utils import env
 from .container_template_data import ContainerTemplateData
 from .container_template_env import ContainerTemplateEnv
 from .container_template_image import ContainerTemplateImage

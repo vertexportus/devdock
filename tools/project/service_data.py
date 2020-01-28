@@ -14,6 +14,7 @@ class ServiceData(BaseConfig):
     database: str
     version: str or dict
     env_prefix: str
+    env_files: bool or list
     tech_stack: list
 
     @property

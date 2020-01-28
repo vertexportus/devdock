@@ -1,9 +1,16 @@
+import os
+from pprint import pp
+
+from utils import env
+
+
 class ContainerTemplateEnv:
     prefix: str
     prefixed: dict
     exported: dict
     imported: dict
     environment: dict
+    env_file: list
 
     def __init__(self, container, data):
         self.container = container
@@ -13,12 +20,18 @@ class ContainerTemplateEnv:
         exported_raw = (data['exported'] if 'exported' in data else []) + ['host']
         self.exported = dict(zip(exported_raw, list(map(lambda e: f"{self.prefix}_{e.upper()}", exported_raw))))
         self.imported = data['imported'] if 'imported' in data else {}
+        env_files = container.template.service.env_files
+        self.env_file = self.__env_files(env_files) if env_files else []
         self.environment = {}
 
     def calculate_final_env(self):
         # calculate imported
-        prefixed = {k: f"${{{v}}}" for k, v in self.prefixed.items()}
-        imported = {k: self.import_env(v) for k, v in self.imported.items()}
+        env_files_data = ''
+        for env_file in self.env_file:
+            with open(env_file) as stream:
+                env_files_data += "\n" + stream.read()
+        prefixed = {k: f"${{{v}}}" for k, v in self.prefixed.items() if k not in env_files_data}
+        imported = {k: self.import_env(v) for k, v in self.imported.items() if k not in env_files_data}
         self.environment = {**prefixed, **imported}
 
     def import_env(self, dot_path):
@@ -46,8 +59,23 @@ class ContainerTemplateEnv:
                 f"         - prefix: {self.prefix}\n{prefixed}{exported}{imported}{environment}")
 
     def generate_compose(self, compose_service):
-        if len(self.environment):
+        if len(self.environment) > 0:
             compose_service['environment'] = {**self.environment}
+        if len(self.env_file) > 0:
+            compose_service['env_file'] = list(
+                map(lambda x: x.replace(env.project_path(), '${PROJECT_PATH}'), self.env_file)
+            )
+
+    def __env_files(self, files) -> list:
+        result = []
+        if type(files) is bool:
+            result.append(env.project_path('.env'))
+            service_env = env.project_path(f".{self.container.template.service.name}.env")
+            if os.path.isfile(service_env):
+                result.append(service_env)
+        else:
+            result = list(filter(lambda x: os.path.isfile(x), map(lambda x: env.project_path(x), files)))
+        return result
 
     @classmethod
     def __dict_to_str(cls, d):

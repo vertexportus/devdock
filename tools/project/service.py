@@ -8,6 +8,7 @@ class Service(ServiceData):
     def __init__(self, name, master, project, data):
         super().__init__(name, master, project, data)
         self.env_prefix = self.try_get('env_prefix', self.fullname)
+        self.env_files = self.try_get('env_files', False)
         self.database = self.try_get('database', None)
         self.version = self.try_get('version', None)
         self.template = ServiceTemplate(data['template'], service=self)
