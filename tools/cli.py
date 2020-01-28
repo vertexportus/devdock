@@ -8,14 +8,13 @@ import utils.colors
 from project import ProjectConfigManager
 from utils import env, ColoredArgumentParser
 
-
 command_modules = {
     "docker": None,
     "shell": None,
     "git": None,
     "config": None,
     "composer": 'php',
-    "artisan": 'laravel'
+    "laravel": 'laravel'
 }
 
 
@@ -46,7 +45,9 @@ def cli():
                 break
         if class_ref is None:
             print(utils.colors.red(
-                f"module commands.{command} contains no classes with appropriate name (should be a CamelCase of the file's snake_case)"))
+                (f"module commands.{command} contains no classes with appropriate name "
+                 f"(should be a CamelCase of the file's snake_case)")
+            ))
             exit(1)
         class_ref.argparse(parser, subparsers)
         parser_classes[command] = class_ref

@@ -11,18 +11,7 @@ class Composer(base_command.BaseCommand):
         parser_main.add_argument('params', nargs=argparse.REMAINDER, help='composer parameters')
 
     def process_command(self):
-        if self.args.project:
-            project = self.project_config.get_project_by_name(self.args.project)
-            if not project:
-                raise Exception(f"project '{self.args.project}' does not exist")
-            if 'php' not in project.tech_stack:
-                raise Exception(f"project '{self.args.project}' does not support tech 'php'")
-        else:
-            projects = self.project_config.get_projects_by_tech('php')
-            if len(projects) > 1:
-                if not self.args.project:
-                    raise Exception(f"need to specify php project to run composer on with -p|--project")
-            project = projects[0]
+        project = self.get_project_by_name_or_default_by_tech(self.args.project, 'php')
         params = ' '.join(self.args.params) if len(self.args.params) else ''
         self.run_shell(
             f"docker run --rm --volume {project.path}:/app composer {params}")
