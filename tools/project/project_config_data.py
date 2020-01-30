@@ -1,10 +1,13 @@
 import functools
 
+from project.project_repo import ProjectRepo
+
 
 class ProjectConfigData:
     docker: dict
     projects: dict
     services: dict
+    devdock: ProjectRepo
 
     def __str__(self):
         projects = functools.reduce(lambda a, b: f"{a}\n{b}", [f" -- {k}: {v}" for k, v in self.projects.items()])

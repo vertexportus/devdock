@@ -27,8 +27,10 @@ def cli():
 
     # parse additional modules
     parser_classes = dict()
-    project_config_manager = ProjectConfigManager()
+    project_config_manager = ProjectConfigManager() if ProjectConfigManager.config_exists() else None
     for command, command_tech_stack in command_modules.items():
+        if not project_config_manager and command != 'config':
+            continue
         class_ref = None
         if command_tech_stack and not project_config_manager.is_tech_in_use(command_tech_stack):
             continue

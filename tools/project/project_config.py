@@ -4,6 +4,7 @@ from dict_deep import deep_get
 from utils import env
 from .project import Project
 from .project_config_data import ProjectConfigData
+from .project_repo import ProjectRepo
 from .service import Service
 
 
@@ -21,6 +22,7 @@ class ProjectConfig(ProjectConfigData):
         self.projects = {k: Project(k, master=self, data=v) for k, v in data['projects'].items()}
         self.services = {k: Service(k, master=self, project=None, data=v) for k, v in
                          data['services'].items()} if 'services' in data else {}
+        self.devdock = ProjectRepo(None, data['devdock'])
         for service in self.services.values():
             service.update_references()
         for project in self.projects.values():

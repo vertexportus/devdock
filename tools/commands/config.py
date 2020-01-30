@@ -1,7 +1,11 @@
 import os
+import re
 import shutil
 
+import yaml
+
 from commands import base_command
+from project import ProjectConfigManager
 from utils import env
 
 
@@ -10,14 +14,18 @@ class Config(base_command.BaseCommand):
     def argparse(parser, subparsers):
         parser_main = subparsers.add_parser('config', help="environment and project config helper")
         subparser = parser_main.add_subparsers(required=True, dest="config_command", help="config sub-commands")
-        parser_docker = subparser.add_parser('docker', help="generates docker config")
-        parser_docker.add_argument('-g', '--generate', action="store_true", help="generate docker config")
-        parser_docker.add_argument('-p', '--print', action="store_true", help="print docker config on console on "
-                                                                              "generate")
-        parser_docker.add_argument('-e', '--env', nargs="?", default=env.env(),
-                                   help="generate docker config for specific env")
-        parser_env = subparser.add_parser('env', help="manages env configs")
-        parser_env.add_argument('-g', '--generate', action="store_true", help="generate/update env files")
+        parser_init = subparser.add_parser('init', help="initializes a new dev environment")
+        parser_init.add_argument('-r', '--repo', nargs="?", default="git@github.com:vertexportus/devdock.git",
+                                 help="devdock repository to use")
+        if ProjectConfigManager.config_exists():
+            parser_docker = subparser.add_parser('docker', help="generates docker config")
+            parser_docker.add_argument('-g', '--generate', action="store_true", help="generate docker config")
+            parser_docker.add_argument('-p', '--print', action="store_true", help="print docker config on console on "
+                                                                                  "generate")
+            parser_docker.add_argument('-e', '--env', nargs="?", default=env.env(),
+                                       help="generate docker config for specific env")
+            parser_env = subparser.add_parser('env', help="manages env configs")
+            parser_env.add_argument('-g', '--generate', action="store_true", help="generate/update env files")
 
     def process_command(self):
         getattr(self, f"_{self.args.config_command}_handler")()
@@ -39,3 +47,25 @@ class Config(base_command.BaseCommand):
             self.run_shell("direnv allow")
         for e in envs:
             print(f"{e}: {os.environ[e] if e in os.environ else '<none>'}")
+
+    def _init_handler(self):
+        project_file = env.project_config_file_path()
+        if os.path.isfile(project_file):
+            raise Exception('project.yaml file already exists for this project')
+        project_config = {'devdock': {}, 'projects': {}}
+        project_repo_raw = self.args.repo
+        repo_config_key = 'github'
+        if '@github.com:' in project_repo_raw:
+            match = re.findall(r"@github\.com:([\w/]+\.git)", project_repo_raw)
+            if len(match) > 0:
+                project_repo = match[0]
+            else:
+                raise Exception("error trying to parse repo")
+        elif 'https://github.com/' in project_repo_raw:
+            project_repo = project_repo_raw.replace('https://github.com/', 1)
+        else:
+            repo_config_key = 'repo'
+            project_repo = project_repo_raw
+        project_config['devdock'][repo_config_key] = project_repo
+        with open(project_file, "w") as stream:
+            stream.write(yaml.dump(project_config))

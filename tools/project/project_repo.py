@@ -13,7 +13,7 @@ class ProjectRepo:
         elif 'repo' in data:
             self._set_url('repo', data['repo'])
         else:
-            raise Exception(f"No repository configured on project {project.name}")
+            raise Exception(f"No repository configured on project '{project.name if project else 'devdock'}'")
 
     def _set_url(self, url_type, url):
         self.url = f"{self.base_urls[url_type]['ssh' if env.git_use_ssh() else 'http']}{url}" \

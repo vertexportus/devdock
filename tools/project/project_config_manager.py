@@ -8,6 +8,10 @@ from utils import env
 
 
 class ProjectConfigManager:
+    @staticmethod
+    def config_exists():
+        return os.path.isfile(env.project_config_file_path())
+
     def __init__(self):
         self._config = ProjectConfig.load()
 

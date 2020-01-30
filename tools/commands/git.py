@@ -27,11 +27,14 @@ class Git(base_command.BaseCommand):
     def _clone_handler(self):
         projects = self.project_config.get_projects()
         if 'all' in self.args.project:
+            self.__git_clone('devdock', self.project_config.devdock.repo.url)
             for project, project_config in projects.items():
                 self.__git_clone(project, project_config.repo.url)
         else:
             project = self.args.project
-            if project in projects.keys():
+            if project == 'devdock':
+                self.__git_clone('devdock', self.project_config.devdock.repo.url)
+            elif project in projects.keys():
                 self.__git_clone(project, projects[project].repo.url)
             else:
                 raise Exception(f"no configuration set for project '{self.args.project}'")

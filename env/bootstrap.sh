@@ -11,9 +11,11 @@ check_tool "python3.8"
 check_tool "git"
 check_tool "direnv"
 
-git clone ${REPO:-git@github.com:vertexportus/devdock.git} devdock
+repo=${REPO:-git@github.com:vertexportus/devdock.git}
+git clone $repo devdock
 cp devdock/env/direnv .envrc
 direnv allow
 mkdir bin
 cp devdock/env/dev bin/dev
 chmod +x bin/dev
+dev config init --repo ${repo}
