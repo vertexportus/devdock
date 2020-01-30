@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# tools paths
-if [ -z $CLI_COMMAND ]; then export CLI_COMMAND=$(basename "$0"); fi
 # run command
-${PROJECT_PATH}/devdock/cli.py $*
+if [ -z $CLI_COMMAND ]; then export CLI_COMMAND=$(basename "$0"); fi
+${PROJECT_PATH}/devdock/tools/cli.py $*

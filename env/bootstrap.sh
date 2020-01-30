@@ -12,7 +12,7 @@ check_tool "git"
 check_tool "direnv"
 
 git clone ${REPO:-git@github.com:vertexportus/devdock.git} devdock
-cp devdock/direnv .envrc
+cp devdock/env/direnv .envrc
 direnv allow
 mkdir bin
 cp devdock/env/dev bin/dev
