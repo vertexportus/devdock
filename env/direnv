@@ -1,5 +1,5 @@
 if [ -f ".env" ]; then dotenv; else echo "no .env file"; fi
-PATH_add "$PWD/devdock/bin"
+PATH_add "$PWD/bin"
 
 # project/docker
 export PROJECT_PATH=$PWD

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 # tools paths
-tools_full_path=$(realpath $(dirname "$0")/../tools)
 if [ -z $CLI_COMMAND ]; then export CLI_COMMAND=$(basename "$0"); fi
 # run command
-$tools_full_path/cli.py $*
+${PROJECT_PATH}/devdock/cli.py $*
