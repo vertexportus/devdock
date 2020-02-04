@@ -7,6 +7,7 @@ import yaml
 from commands import base_command
 from project import ProjectConfigManager
 from utils import env
+from utils.colors import *
 
 
 class Config(base_command.BaseCommand):
@@ -26,6 +27,7 @@ class Config(base_command.BaseCommand):
                                        help="generate docker config for specific env")
             parser_env = subparser.add_parser('env', help="manages env configs")
             parser_env.add_argument('-g', '--generate', action="store_true", help="generate/update env files")
+            parser_hosts = subparser.add_parser('hosts', help="generates host information")
 
     def process_command(self):
         getattr(self, f"_{self.args.config_command}_handler")()
@@ -69,3 +71,14 @@ class Config(base_command.BaseCommand):
         project_config['devdock'][repo_config_key] = project_repo
         with open(project_file, "w") as stream:
             stream.write(yaml.dump(project_config))
+
+    def _hosts_handler(self):
+        regex = re.compile(r"\d+\.\d+\.\d+\.\d+\s+([\w.]+)\s+#\s" + env.project_name() + r"\scommand\sregistry")
+        with open("/etc/hosts", "r") as stream:
+            hosts_config = stream.read()
+        matches = regex.findall(hosts_config)
+        if len(matches) == 0:
+            self.run_shell(f"echo \"127.0.0.1  {env.project_name()}.local # {env.project_name()} command registry\" | sudo tee -a /etc/hosts")
+            print(green("hosts configured properly"))
+        else:
+            print(yellow(f"hosts already configured for this project with url: {next(iter(matches))}"))

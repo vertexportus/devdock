@@ -9,6 +9,10 @@ def env() -> str:
     return os.environ['ENV']
 
 
+def project_name() -> str:
+    return os.environ['PROJECT_NAME']
+
+
 def compose_project_name() -> str:
     return os.environ['COMPOSE_PROJECT_NAME'] if 'COMPOSE_PROJECT_NAME' in os.environ else 'devdock'
 
