@@ -4,11 +4,15 @@
 if [[ -z $ENV ]]; then export ENV=dev; fi
 if [[ -z $PROJECT_NAME ]]; then export PROJECT_NAME=${PROJECT_PATH##*/}; fi
 export COMPOSE_PROJECT_NAME=$PROJECT_NAME;
-export COMPOSE_FILE="$PROJECT_PATH/devdock/docker/gen/docker-compose-$ENV.yaml"
+export COMPOSE_FILE="$DEVDOCK_PATH/docker/gen/docker-compose-$ENV.yaml"
 
 # user/group
 export USERID=$(id -u)
 export GROUPID=$(id -g)
+
+# url
+url=$(python3 $DEVDOCK_PATH/env/get_env_url.py)
+if [[ -n $url ]]; then export BASE_URL=$url; else export BASE_URL=localhost; fi
 
 # php xdebug
 if [[ -z $XDEBUG_ENABLE ]]; then export XDEBUG_ENABLE=0; fi
