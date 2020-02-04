@@ -1,4 +1,6 @@
-if [ -f ".env" ]; then dotenv; else echo "no .env file"; fi
+DIRENV_LOG_FORMAT="$(printf "\033[0;33m %%s\033[0m")"
+
+if [ -f ".env" ]; then dotenv; else echo -e "\e[1;33mwarning: no .env file\e[0m"; fi
 PATH_add "$PWD/bin"
 
 # project/docker
