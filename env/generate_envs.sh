@@ -2,7 +2,7 @@
 
 # versions
 echo -e "\n\e[0;36mdevdock version: \e[1;36m$([[ -d $DEVDOCK_PATH ]] && cat $DEVDOCK_PATH/VERSION || echo devdock not cloned yet)\e[0;33m"
-cmp --silent $PROJECT_PATH/.envrc $DEVDOCK_PATH/env/direnv && echo "" || echo -e "\e[1;33mwarning: \e[0;33mdirenv master file is outdated. please run \e[1;33mdev config direnv\e[0;33m to update\n"
+cmp --silent $PROJECT_PATH/.envrc $DEVDOCK_PATH/env/direnv && echo "" || echo -e "\e[1;33mwarning: \e[0;33mdirenv master file is outdated. please run \e[1;33mdev config env -g\e[0;33m to update\n"
 
 # project/docker
 if [[ -z $ENV ]]; then export ENV=dev; fi
