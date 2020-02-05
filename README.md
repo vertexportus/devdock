@@ -23,4 +23,5 @@ services:
 ## TODO
 
 - change current `parse_var` logic to use string templating instead
+    - provide defaults
 - add support for dynamic nginx.proxy
