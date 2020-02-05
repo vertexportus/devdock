@@ -6,6 +6,7 @@ from utils import env
 
 class ContainerTemplateEnv:
     prefix: str
+    mapped: dict
     prefixed: dict
     exported: dict
     imported: dict
@@ -15,6 +16,12 @@ class ContainerTemplateEnv:
     def __init__(self, container, data):
         self.container = container
         self.prefix = container.template.service.env_prefix.upper()
+        mapped_raw = data['mapped'] if 'mapped' in data else []
+        if type(mapped_raw) == list:
+            mapped_raw_upper = list(map(lambda x: x.upper(), mapped_raw))
+            self.mapped = dict(zip(mapped_raw_upper, mapped_raw_upper))
+        else:
+            self.mapped = {k: v.upper() for k, v in mapped_raw}
         self.prefixed = {k: f"{self.prefix}_{v.upper()}"
                          for k, v in (data['prefixed'] if 'prefixed' in data else {}).items()}
         exported_raw = (data['exported'] if 'exported' in data else []) + ['host']
@@ -30,9 +37,10 @@ class ContainerTemplateEnv:
         for env_file in self.env_file:
             with open(env_file) as stream:
                 env_files_data += "\n" + stream.read()
+        mapped = {k: f"${{{v}}}" for k, v in self.mapped.items() if k not in env_files_data}
         prefixed = {k: f"${{{v}}}" for k, v in self.prefixed.items() if k not in env_files_data}
         imported = {k: self.import_env(v) for k, v in self.imported.items() if k not in env_files_data}
-        self.environment = {**prefixed, **imported}
+        self.environment = {**mapped, **prefixed, **imported}
 
     def import_env(self, dot_path):
         [attr, var] = dot_path.split('.')

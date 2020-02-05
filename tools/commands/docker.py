@@ -22,6 +22,11 @@ class Docker(base_command.BaseCommand):
                                  help='additional arguments passed directly into docker-compose down')
         # docker destroy
         parser_destroy = subparser.add_parser('destroy', help="destroys all containers and images")
+        # docker build
+        parser_build = subparser.add_parser('build', help="builds docker images")
+        parser_build.add_argument('--rebuild', action="store_true", help="forces rebuild of image without cache")
+        parser_build.add_argument('-g', '--generate', action="store_true", help="generate docker config")
+        parser_build.add_argument('containers', nargs=argparse.REMAINDER, help="list of containers to build")
         # docker ps
         parser_ps = subparser.add_parser('ps', help="lists all project running containers and their status")
         # docker exec
@@ -58,6 +63,16 @@ class Docker(base_command.BaseCommand):
     def _destroy_handler(self):
         self._check_docker_config()
         self.run_shell("docker-compose down --rmi all --remove-orphans")
+
+    def _build_handler(self):
+        if self.args.generate:
+            print(utils.colors.blue("generating docker config..."))
+            self.project_config.generate_docker(False)
+        else:
+            self._check_docker_config(gen=True)
+        containers = ' '.join(self.args.containers) if len(self.args.containers) > 0 else ''
+        args = f"--force-rm {'--no-cache' if self.args.rebuild else ''}"
+        self.run_shell(f"docker-compose build {args} {containers}")
 
     def _ps_handler(self):
         self._check_docker_config()

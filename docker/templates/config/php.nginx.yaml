@@ -6,7 +6,6 @@ containers:
       - php
     build:
       context: build/${ENV}/php/nginx/php
-      dockerfile: php.Dockerfile
       args:
         TAG: "%(service.version.php:7.4)-fpm-alpine"
         USERID: ${USERID}
@@ -31,7 +30,6 @@ containers:
       - nginx
     build:
       context: build/${ENV}/php/nginx/web
-      dockerfile: web.Dockerfile
       args:
         TAG: "%(service.version.nginx:1.17)-alpine"
         USERID: ${USERID}

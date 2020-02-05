@@ -1,7 +1,5 @@
 ARG TAG
 FROM nginx:$TAG
-ARG TAG
-RUN echo "building image from nginx:$TAG"
 
 # set user/group
 RUN set -x && apk add --update --no-cache --virtual .shadow shadow

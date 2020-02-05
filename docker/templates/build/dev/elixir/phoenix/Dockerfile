@@ -1,9 +1,5 @@
 ARG TAG
-
 FROM elixir:$TAG
-
-ARG TAG
-RUN echo "building image from elixir:$TAG"
 
 # packages
 RUN apk update \

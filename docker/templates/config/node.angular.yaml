@@ -1,0 +1,24 @@
+containers:
+  angular:
+    stack:
+      - node
+      - angular
+    build:
+      context: build/${ENV}/node/angular
+      args:
+        TAG: "%(service.version.node:13.7)-alpine"
+        ANGULAR_VERSION: "%(service.version.angular:8.3.24)"
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+    volumes:
+      mapped:
+        - "%(project.path):/app"
+    env:
+      mapped:
+        - base_url
+      exported:
+        - http_port
+    ports:
+      http_port:
+        default: 4200
+        env: http_port

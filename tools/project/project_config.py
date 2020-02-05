@@ -1,3 +1,5 @@
+from pprint import pp
+
 import yaml
 from dict_deep import deep_get
 
@@ -38,7 +40,13 @@ class ProjectConfig(ProjectConfigData):
             else:
                 return None
         else:
-            return self.services[service_path] if service_path in self.services else None
+            service = self.services[service_path] if service_path in self.services else None
+            if service:
+                return service
+            else:
+                if service_path in self.projects:
+                    project = self.projects[service_path]
+                    return project.services[service_path] if service_path in project.services else None
 
     def get_compose(self, for_env):
         compose_version = deep_get(self.docker, 'compose.version')

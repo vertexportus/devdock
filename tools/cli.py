@@ -73,5 +73,5 @@ if __name__ == '__main__':
         if verbose:
             traceback.print_exc()
         else:
-            print(utils.colors.red(ex))
+            print(utils.colors.red(repr(ex)))
         exit(1)

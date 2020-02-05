@@ -33,6 +33,7 @@ class ProjectConfigManager:
         return self._config.get_service_by_path(service_path)
 
     def get_container_name_by_simple_path(self, simple_path):
+        container = None
         if '.' in simple_path:
             projects = self.get_projects()
             [base, path] = simple_path.split('.', 1)
@@ -54,8 +55,9 @@ class ProjectConfigManager:
                 container = service.containers[path]
         else:
             service = self.get_service_by_path(simple_path)
-            container = service.containers[next(iter(service.containers))]
-        return container.fullname
+            if service and len(service.containers) > 0:
+                container = service.containers[next(iter(service.containers))]
+        return container.fullname if container else None
 
     def get_env(self):
         return self._config.get_env()
