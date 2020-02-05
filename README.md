@@ -19,3 +19,8 @@ services:
   db:
     template: postgres
 ```
+
+## TODO
+
+- change current `parse_var` logic to use string templating instead
+- add support for dynamic nginx.proxy
