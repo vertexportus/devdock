@@ -19,7 +19,7 @@ class ProjectConfigManager:
         return self._config.projects
 
     def generate_docker(self, print_console, for_env=env.env()):
-        compose = self._config.get_compose(for_env)
+        compose = self._config.get_compose()
         compose_file_path = env.docker_compose_file_path(for_env)
         gen_path = os.path.dirname(compose_file_path)
         if not os.path.isdir(gen_path):
@@ -33,31 +33,7 @@ class ProjectConfigManager:
         return self._config.get_service_by_path(service_path)
 
     def get_container_name_by_simple_path(self, simple_path):
-        container = None
-        if '.' in simple_path:
-            projects = self.get_projects()
-            [base, path] = simple_path.split('.', 1)
-            if base in projects:
-                project = projects[base]
-                if base in project.services:
-                    service = project.services[base]
-                    container = service.containers[path]
-                else:
-                    if '.' in path:
-                        [service_name, container_name] = path.split('.')
-                        service = project.services[service_name]
-                        container = service.containers[container_name] if service else None
-                    else:
-                        service = project.services[path]
-                        container = service.containers[next(iter(service.containers))]
-            else:
-                service = self.get_service_by_path(base)
-                container = service.containers[path]
-        else:
-            service = self.get_service_by_path(simple_path)
-            if service and len(service.containers) > 0:
-                container = service.containers[next(iter(service.containers))]
-        return container.fullname if container else None
+        return self._config.get_container_name_by_path(simple_path)
 
     def get_env(self):
         return self._config.get_env()

@@ -4,15 +4,15 @@ containers:
       - node
       - angular
     build:
-      context: build/${ENV}/node/angular
+      context: build/%= env.env =%/node/angular
       args:
-        TAG: "%(service.version.node:13.7)-alpine"
-        ANGULAR_VERSION: "%(service.version.angular:8.3.24)"
+        TAG: %= service|version('node', defaults) =%-alpine
+        ANGULAR_VERSION: %= service|version('angular', defaults) =%
         USERID: ${USERID}
         GROUPID: ${GROUPID}
     volumes:
       mapped:
-        - "%(project.path):/app"
+        - %= project.path =%:/app
     env:
       mapped:
         - base_url

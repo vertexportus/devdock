@@ -14,6 +14,6 @@ class ServiceTemplate(ServiceTemplateData):
             container.update_dependencies()
             container.calculate_final_env()
 
-    def generate_compose(self, compose, for_env):
+    def generate_compose(self, compose):
         for container in self.containers.values():
-            container.generate_compose(compose, for_env)
+            container.generate_compose(compose)

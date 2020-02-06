@@ -1,4 +1,5 @@
 import re
+from pprint import pp
 
 from project.generation import generate_build_files
 from utils import env
@@ -21,7 +22,7 @@ class ContainerTemplateImage:
         return (f"image(build:{self.is_build}):\n"
                 f"         - {self.image if type(self.image) is str else self.__dict_to_str(self.image)}\n")
 
-    def generate_compose(self, compose_service, for_env):
+    def generate_compose(self, compose_service):
         if self.is_build:
             image = {**self.image}
             if type(image['context']) is list:
@@ -38,12 +39,15 @@ class ContainerTemplateImage:
                 'project': self.container.template.service.project,
                 'defaults': self.container.template.service.master.defaults
             }
-            generate_build_files(contexts, contexts[0], self.container.template.service.master.templates, **template_params)
-
-            #                      {
-            #     'container': self.container,
-            #     'siblings': self.container.template.containers
-            # })
+            if 'params' in image:
+                template_params = {**template_params, **image['params']}
+                del image['params']
+            generate_build_files(
+                contexts,
+                contexts[0],
+                self.container.template.service.master.templates,
+                **template_params
+            )
         else:
             compose_service['image'] = self.image
 

@@ -1,0 +1,29 @@
+required:
+  - targets
+containers:
+  nginx:
+    stack:
+      - http
+      - nginx
+    build:
+      context: build/%= env.env =%/nginx/proxy
+      params:
+        targets: %= service.targets|dmap(service.master.get_container_name_by_path) =%
+      args:
+        TAG: %= service|version('nginx', defaults) =%-alpine
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+    volumes:
+      mapped:
+        - %= project.path =%:/var/www
+    env:
+      exported:
+        - http_port
+        - https_port
+    ports:
+      http_port:
+        default: 80
+        env: http_port
+      https_port:
+        default: 443
+        env: https_port

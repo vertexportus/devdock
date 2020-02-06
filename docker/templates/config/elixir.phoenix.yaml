@@ -5,16 +5,16 @@ containers:
     stack:
       - http
       - elixir
-      - phoenix-framework
+      - phoenix
     build:
       context: build/${ENV}/elixir/phoenix
       args:
-        TAG: "%(service.version:1.9)-alpine"
+        TAG: %= service.version.elixir if service.version.elixir else defaults.elixir.version =%-alpine
         USERID: ${USERID}
         GROUPID: ${GROUPID}
     volumes:
       mapped:
-        - "%(project.path):/app"
+        - %= project.path =%:/app
     env:
       imported:
         DB_USER: database.user

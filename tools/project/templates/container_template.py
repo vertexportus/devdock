@@ -23,9 +23,9 @@ class ContainerTemplate(ContainerTemplateData):
         self.depends_on = list(map(lambda x: self.__get_sibling_fullname(x), self.try_get('depends_on', [])))
         self.depends_on += self.template.service.get_container_dependencies()
 
-    def generate_compose(self, compose, for_env):
+    def generate_compose(self, compose):
         service = {}
-        self.image.generate_compose(service, for_env)
+        self.image.generate_compose(service)
         self.volumes.generate_compose(service, compose['volumes'])
         self.env.generate_compose(service)
         self.ports.generate_compose(service)

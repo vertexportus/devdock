@@ -10,8 +10,7 @@ class ContainerTemplateVolumes:
         self.named = {
             f"{container.template.service.fullname}_{k}": v
             for k, v in (data['named'].items() if 'named' in data else {})}
-        self.mapped = list(map(lambda v: env.reverse_project_path(container.template.service.parse_var(v)),
-                               data['mapped'] if 'mapped' in data else []))
+        self.mapped = list(map(lambda v: env.reverse_project_path(v), data['mapped'] if 'mapped' in data else []))
 
     def __str__(self):
         return (f"volumes\n"

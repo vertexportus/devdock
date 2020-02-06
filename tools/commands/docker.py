@@ -70,7 +70,8 @@ class Docker(base_command.BaseCommand):
             self.project_config.generate_docker(False)
         else:
             self._check_docker_config(gen=True)
-        containers = ' '.join(self.args.containers) if len(self.args.containers) > 0 else ''
+        containers = ' '.join(list(map(lambda x: self.__get_container_name(x), self.args.containers)))\
+            if len(self.args.containers) > 0 else ''
         args = f"--force-rm {'--no-cache' if self.args.rebuild else ''}"
         self.run_shell(f"docker-compose build {args} {containers}")
 

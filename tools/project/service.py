@@ -12,10 +12,11 @@ class Service(ServiceData):
         self.database = self.try_get('database', None)
         self.version = self.try_get('version', None)
         self.ports = self.try_get('ports', False)
+        self.targets = self.try_get('targets', {})
         self.template = ServiceTemplate(data['template'], service=self)
 
-    def generate_compose(self, compose, for_env):
-        self.template.generate_compose(compose, for_env)
+    def generate_compose(self, compose):
+        self.template.generate_compose(compose)
 
     def get_env(self) -> list:
         envs = []

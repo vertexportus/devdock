@@ -1,3 +1,5 @@
+from pprint import pp
+
 import yaml
 from jinja2 import Environment, FileSystemLoader, Template
 
@@ -17,6 +19,8 @@ class Templates:
             comment_start_string='%#',
             comment_end_string='#%'
         )
+        self.env.filters['version'] = self.version
+        self.env.filters['dmap'] = self.dmap
 
     def get_template(self, path) -> Template:
         return self.env.get_template(path)
@@ -29,3 +33,21 @@ class Templates:
             self.render_template(path, **kwargs),
             Loader=yaml.FullLoader
         )
+
+    @staticmethod
+    def version(service, name, defaults) -> str:
+        version = None
+        if hasattr(service, 'version'):
+            version_attr = service.version
+            if version_attr:
+                if type(version_attr) == str:
+                    return version_attr
+                elif name in version_attr:
+                    version = version_attr[name]
+        if not version:
+            version = defaults[name]['version']
+        return version
+
+    @staticmethod
+    def dmap(dictionary, fn) -> dict:
+        return {k: fn(v) for k, v in dictionary.items()}

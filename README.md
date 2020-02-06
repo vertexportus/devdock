@@ -22,6 +22,6 @@ services:
 
 ## TODO
 
-- change current `parse_var` logic to use string templating instead
-    - provide defaults
+- add support for angular commands through cli
 - add support for dynamic nginx.proxy
+- change default ports for http/https
