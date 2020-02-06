@@ -1,6 +1,7 @@
 import re
 
 from project.generation import generate_build_files
+from utils import env
 
 
 class ContainerTemplateImage:
@@ -22,17 +23,27 @@ class ContainerTemplateImage:
 
     def generate_compose(self, compose_service, for_env):
         if self.is_build:
-            regex = re.compile(r"\${*ENV}*")
             image = {**self.image}
-            image_context = image['context']
-            contexts = list(map(lambda x: regex.sub(for_env, x), image_context))\
-                if type(image_context) is list else [regex.sub(for_env, image_context)]
-            image['context'] = contexts[0]
+            if type(image['context']) is list:
+                contexts = image['context']
+                image['context'] = contexts[0]
+            else:
+                contexts = [image['context']]
             compose_service['build'] = image
-            generate_build_files(contexts, contexts[0], {
+            template_params = {
+                'env': env.get_env_dict(),
                 'container': self.container,
-                'siblings': self.container.template.containers
-            })
+                'siblings': self.container.template.containers,
+                'service': self.container.template.service,
+                'project': self.container.template.service.project,
+                'defaults': self.container.template.service.master.defaults
+            }
+            generate_build_files(contexts, contexts[0], self.container.template.service.master.templates, **template_params)
+
+            #                      {
+            #     'container': self.container,
+            #     'siblings': self.container.template.containers
+            # })
         else:
             compose_service['image'] = self.image
 
