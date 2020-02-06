@@ -9,6 +9,12 @@ def env() -> str:
     return os.environ['ENV']
 
 
+def get_env_dict() -> dict:
+    return {
+        'env': env()
+    }
+
+
 def project_name() -> str:
     return os.environ['PROJECT_NAME']
 
@@ -21,6 +27,10 @@ def project_path(suffix=None) -> str:
     return os.path.abspath(f"{os.environ['PROJECT_PATH']}{'/' + suffix if suffix else ''}")
 
 
+def devdock_path(suffix=None) -> str:
+    return project_path(f"devdock{'/' + suffix if suffix else ''}")
+
+
 def reverse_project_path(path) -> str:
     return path.replace(project_path(), "${PROJECT_PATH}")
 
@@ -30,15 +40,15 @@ def project_config_file_path() -> str:
 
 
 def env_template_path(path) -> str:
-    return project_path(f"devdock/env/{path}")
+    return devdock_path(f"env/{path}")
 
 
 def docker_template_path(suffix=None) -> str:
-    return project_path(f"devdock/docker/templates{'/' + suffix if suffix else ''}")
+    return devdock_path(f"docker/templates{'/' + suffix if suffix else ''}")
 
 
 def docker_gen_path(suffix=None) -> str:
-    return project_path(f"devdock/docker/gen{'/' + suffix if suffix else ''}")
+    return devdock_path(f"docker/gen{'/' + suffix if suffix else ''}")
 
 
 def docker_compose_file_path(for_env=None) -> str:

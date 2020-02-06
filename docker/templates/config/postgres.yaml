@@ -5,7 +5,7 @@ containers:
       - postgres
     image:
       name: postgres
-      tag: "%(service.version:12)-alpine"
+      tag: %= service.version if service.version else defaults.postgres.version =%-alpine
     volumes:
       named:
         data: /var/lib/postgresql/data

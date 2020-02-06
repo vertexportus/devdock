@@ -1,3 +1,5 @@
+from pprint import pp
+
 import yaml
 from deepmerge import always_merger
 
@@ -13,13 +15,19 @@ class ServiceTemplateData(BaseConfig):
 
     def __init__(self, name, service):
         self.service = service
-        self.file_path = env.docker_template_path(f"config/{name}.yaml")
-        with open(self.file_path, 'r') as stream:
-            raw_data = yaml.load(stream, Loader=yaml.FullLoader)
+        # self.file_path = env.docker_template_path(f"config/{name}.yaml")
+        self.file_path = f"config/{name}.yaml"
+        template_params = {
+            'env': env.get_env_dict(),
+            'service': service,
+            'project': service.project,
+            'defaults': service.master.defaults
+        }
+        raw_data = service.master.templates.render_template_yaml(self.file_path, **template_params)
         if 'inherits' in raw_data:
-            inherited_file = env.docker_template_path(f"config/{raw_data['inherits']}.yaml")
-            with open(inherited_file, 'r') as stream:
-                inherited_data = yaml.load(stream, Loader=yaml.FullLoader)
+            # inherited_file = env.docker_template_path(f"config/{raw_data['inherits']}.yaml")
+            inherited_file = f"config/{raw_data['inherits']}.yaml"
+            inherited_data = service.master.templates.render_template_yaml(inherited_file, **template_params)
             raw_data = always_merger.merge(inherited_data, raw_data)
             self.file_path = [self.file_path, inherited_file]
         super().__init__(name, raw_data)

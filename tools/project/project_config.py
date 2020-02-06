@@ -4,6 +4,7 @@ import yaml
 from dict_deep import deep_get
 
 from utils import env
+from utils.templates import Templates
 from .project import Project
 from .project_config_data import ProjectConfigData
 from .project_repo import ProjectRepo
@@ -20,8 +21,12 @@ class ProjectConfig(ProjectConfigData):
             return cls(yaml.load(stream, Loader=yaml.FullLoader))
 
     def __init__(self, data):
+        with open(env.devdock_path('docker/defaults.yaml')) as stream:
+            self.defaults = yaml.load(stream, Loader=yaml.FullLoader)
+        self.templates = Templates(env.docker_template_path())
         self.docker = data['docker'] if 'docker' in data else {}
-        self.projects = {k: Project(k, master=self, data=v) for k, v in data['projects'].items()}
+        self.projects = {k: Project(k, master=self, data=v) for k, v in
+                         data['projects'].items()} if 'projects' in data and type(data['projects']) is dict else {}
         self.services = {k: Service(k, master=self, project=None, data=v) for k, v in
                          data['services'].items()} if 'services' in data else {}
         self.devdock = ProjectRepo(None, data['devdock'])

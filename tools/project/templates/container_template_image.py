@@ -1,9 +1,6 @@
-import os
 import re
-import shutil
 
 from project.generation import generate_build_files
-from utils import env
 
 
 class ContainerTemplateImage:
@@ -45,12 +42,12 @@ class ContainerTemplateImage:
 
     def __as_image(self, image):
         self.is_build = False
-        self.image = f"{image['name']}:{self.container.template.service.parse_var(image['tag'])}"
+        self.image = f"{image['name']}:{image['tag']}"
         pass
 
     def __as_build(self, build):
         self.is_build = True
-        self.image = self.__process_vars(build)
+        self.image = build
         pass
 
     def __process_vars(self, value):

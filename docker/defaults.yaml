@@ -1,0 +1,6 @@
+postgres:
+  version: 12
+php:
+  version: 7.4
+nginx:
+  version: 1.17

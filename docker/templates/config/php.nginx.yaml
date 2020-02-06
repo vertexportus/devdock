@@ -5,19 +5,19 @@ containers:
     stack:
       - php
     build:
-      context: build/${ENV}/php/nginx/php
+      context: build/%= env.env =%/php/nginx/php
       args:
-        TAG: "%(service.version.php:7.4)-fpm-alpine"
+        TAG: %= service.version.php if service.version.php else defaults.php.version =%-fpm-alpine"
         USERID: ${USERID}
         GROUPID: ${GROUPID}
-        XDEBUG_ENABLE: ${%(project.name!upper)_XDEBUG_ENABLE:-${XDEBUG_ENABLE:-0}}
-        XDEBUG_VERSION: ${%(project.name!upper)_XDEBUG_VERSION:-${XDEBUG_VERSION:-2.8.1}}
+        XDEBUG_ENABLE: ${%= project.name.upper() =%_XDEBUG_ENABLE:-${XDEBUG_ENABLE:-0}}
+        XDEBUG_VERSION: ${%= project.name.upper() =%_XDEBUG_VERSION:-${XDEBUG_VERSION:-2.8.1}}
         XDEBUG_REMOTE_HOST: ${XDEBUG_REMOTE_HOST}
         XDEBUG_REMOTE_PORT: ${XDEBUG_REMOTE_PORT:-""}
         XDEBUG_IDEKEY: ${XDEBUG_IDEKEY:-""}
     volumes:
       mapped:
-        - "%(project.path):/var/www"
+        - %= project.path =%:/var/www
     env:
       imported:
         DB_USER: database.user
@@ -29,14 +29,14 @@ containers:
       - http
       - nginx
     build:
-      context: build/${ENV}/php/nginx/web
+      context: build/%= env.env =%/php/nginx/web
       args:
-        TAG: "%(service.version.nginx:1.17)-alpine"
+        TAG: %= service.version.nginx if service.version.nginx else defaults.nginx.version =%-alpine
         USERID: ${USERID}
         GROUPID: ${GROUPID}
     volumes:
       mapped:
-        - "%(project.path):/var/www"
+        - %= project.path =%:/var/www
     depends_on:
       - php
     env:

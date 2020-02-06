@@ -5,4 +5,4 @@ containers:
       - laravel
   web:
     build:
-      context: ['build/${ENV}/php/nginx/web', 'build/${ENV}/php/laravel/web']
+      context: ['build/%= env.env =%/php/nginx/web', 'build/%= env.env =%/php/laravel/web']
