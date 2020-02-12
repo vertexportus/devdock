@@ -11,21 +11,24 @@ class ServiceTemplateData(BaseConfig):
     file_path: str or list
     required: list
     containers: dict
-    has_single_container: bool
+
+    @property
+    def has_single_container(self) -> bool:
+        return len(self._original_data['containers']) < 2
 
     def __init__(self, name, service):
         self.service = service
         self.file_path = f"config/{name}.yaml"
-        template_params = {
+        self.template_params = {
             'env': env.get_env_dict(),
             'service': service,
             'project': service.project,
             'defaults': service.master.defaults
         }
-        raw_data = service.master.templates.render_template_yaml(self.file_path, **template_params)
+        raw_data = service.master.templates.render_template_yaml(self.file_path, **self.template_params)
         if 'inherits' in raw_data:
             inherited_file = f"config/{raw_data['inherits']}.yaml"
-            inherited_data = service.master.templates.render_template_yaml(inherited_file, **template_params)
+            inherited_data = service.master.templates.render_template_yaml(inherited_file, **self.template_params)
             raw_data = always_merger.merge(inherited_data, raw_data)
             self.file_path = [self.file_path, inherited_file]
         super().__init__(name, raw_data)

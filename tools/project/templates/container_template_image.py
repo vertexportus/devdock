@@ -1,5 +1,4 @@
-import re
-from pprint import pp
+from dict_deep import deep_set
 
 from project.generation import generate_build_files
 from utils import env
@@ -51,6 +50,9 @@ class ContainerTemplateImage:
         else:
             compose_service['image'] = self.image
 
+    def update_dependencies(self, prop, values):
+        deep_set(self.image, prop, values)
+
     @classmethod
     def __dict_to_str(cls, d):
         return str.join('\n         - ', list(map(lambda e: f"{e}", {k: f"{k}={v}" for k, v in d.items()}.values())))
@@ -58,19 +60,7 @@ class ContainerTemplateImage:
     def __as_image(self, image):
         self.is_build = False
         self.image = f"{image['name']}:{image['tag']}"
-        pass
 
     def __as_build(self, build):
         self.is_build = True
         self.image = build
-        pass
-
-    def __process_vars(self, value):
-        if type(value) is str:
-            return self.container.template.service.parse_var(value)
-        elif type(value) is dict:
-            return {k: self.__process_vars(v) for k, v in value.items()}
-        elif type(value) is list:
-            return list(map(lambda x: self.__process_vars(x), value))
-        else:
-            raise Exception(f"invalid data type in template '{self.container.template.name}'")

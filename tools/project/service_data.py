@@ -34,6 +34,9 @@ class ServiceData(BaseConfig):
     def __str__(self):
         return f"service {self.name} ({self.fullname})\n    template: {self.template}"
 
+    def __getitem__(self, item):
+        return getattr(self, item)
+
     def data_hasattr(self, attr):
         return attr in self._original_data
 

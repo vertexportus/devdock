@@ -1,4 +1,5 @@
-from utils import env
+from pprint import pp
+
 from .container_template_data import ContainerTemplateData
 from .container_template_env import ContainerTemplateEnv
 from .container_template_image import ContainerTemplateImage
@@ -19,8 +20,14 @@ class ContainerTemplate(ContainerTemplateData):
     def calculate_final_env(self):
         self.env.calculate_final_env()
 
-    def update_dependencies(self):
-        self.depends_on = list(map(lambda x: self.__get_sibling_fullname(x), self.try_get('depends_on', [])))
+    def update_dependencies(self, references_map):
+        self.depends_on = []
+        if references_map:
+            [prop, prop_path] = references_map['prop'].split('.', 1)
+            if prop == 'build':
+                self.image.update_dependencies(prop_path, references_map['values'])
+                self.depends_on += [v for v in references_map['values'].values()]
+        self.depends_on += list(map(lambda x: self.__get_sibling_fullname(x), self.try_get('depends_on', [])))
         self.depends_on += self.template.service.get_container_dependencies()
 
     def generate_compose(self, compose):
