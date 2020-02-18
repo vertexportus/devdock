@@ -5,7 +5,7 @@ containers:
       - postgres
     image:
       name: postgres
-      tag: %= service|version('postgres') =%-alpine
+      use_alpine: true
     volumes:
       named:
         data: /var/lib/postgresql/data
