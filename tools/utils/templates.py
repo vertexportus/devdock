@@ -49,3 +49,8 @@ class Templates:
     @staticmethod
     def dmap(dictionary, fn) -> dict:
         return {k: fn(v) for k, v in dictionary.items()}
+
+    def __deepcopy__(self, memodict=None):
+        if memodict is None:
+            memodict = {}
+        return {}
