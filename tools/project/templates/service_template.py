@@ -1,4 +1,3 @@
-from utils import env
 from utils.yaml_template_object import YamlTemplateObject
 
 
@@ -19,4 +18,3 @@ class ServiceTemplate(YamlTemplateObject):
             },
             template_name=f"{self.base_path}/config.yaml"
         )
-        self.data = self._data

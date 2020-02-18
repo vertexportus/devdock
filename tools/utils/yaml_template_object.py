@@ -5,7 +5,7 @@ from utils.yaml_data_object import YamlDataObject
 
 
 class YamlTemplateObject(YamlDataObject):
-    base_hidden_fields = ['_data', 'templates', 'template_params']
+    base_hidden_fields = ['templates', 'template_params']
     yaml_tag = "!YamlTemplateObject"
     templates: Templates
     template_params: dict
@@ -15,8 +15,10 @@ class YamlTemplateObject(YamlDataObject):
         self.template_params = template_params
         if file_path:
             super().__init__(file_path=file_path)
-        else:
+        elif template_name:
             super().__init__(data=self.load_template(template_name))
+        else:
+            raise Exception("Either file_path or template_name must be set on YamlTemplateObject.__init__")
 
     def load_template_data(self, template_name):
         self._data = self.load_template(template_name)
