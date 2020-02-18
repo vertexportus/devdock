@@ -1,0 +1,17 @@
+docker-compose:
+  version:
+    minimum: 3.0
+    auto: 3.7
+
+postgres:
+  version: 12
+php:
+  version: 7.4
+nginx:
+  version: 1.17
+elixir:
+  version: 1.9
+node:
+  version: 13.7
+angular:
+  version: 8.3.24

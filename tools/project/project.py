@@ -1,19 +1,23 @@
 from utils import env
-from .project_data import ProjectData
+from utils.yaml_data_object import YamlDataObject
 from .project_repo import ProjectRepo
 from .service import Service
 
 
-class Project(ProjectData):
+class Project(YamlDataObject):
+    hidden_fields = ['master']
+    yaml_tag = '!Project'
+    name: str
+    repo: ProjectRepo
+    path: str
+    services: dict
+    tech_stack: list
+
     def __init__(self, name, master, data):
-        super().__init__(name, master, data)
+        super().__init__(data=data)
+        self.master = master
+        self.name = name
         self.repo = ProjectRepo(self, data)
         self.path = env.project_path(name)
-        self.services = {k: Service(k, master=self.master, project=self, data=v) for k, v in
-                         data['services'].items()} if 'services' in data else {}
-
-    def get_container_by_stack(self, stack: str):
-        service = next(iter(filter(lambda x: stack in x.tech_stack, self.services.values())))
-        if service:
-            return next(iter(filter(lambda x: stack in x.tech_stack, service.template.containers.values())))
-        return None
+        self.services = {k: Service(k, master=master, data=v, project=self)
+                         for k, v in self.try_get('services', {}).items()}

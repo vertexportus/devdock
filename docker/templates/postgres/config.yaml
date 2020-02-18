@@ -1,0 +1,25 @@
+containers:
+  postgres:
+    stack:
+      - sql
+      - postgres
+    image:
+      name: postgres
+      tag: %= service|version('postgres') =%-alpine
+    volumes:
+      named:
+        data: /var/lib/postgresql/data
+    env:
+      prefixed:
+        POSTGRES_USER: user
+        POSTGRES_PASSWORD: password
+        POSTGRES_DB: database
+      exported:
+        - user
+        - password
+        - database
+        - port
+    ports:
+      db_port:
+        default: 5432
+        env: port

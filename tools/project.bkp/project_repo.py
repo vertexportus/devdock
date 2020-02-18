@@ -1,11 +1,7 @@
-import yaml
-
 from utils import env
 
 
-class ProjectRepo(yaml.YAMLObject):
-    yaml_tag = '!Repo'
-
+class ProjectRepo:
     base_urls = {
         'github': {'ssh': 'git@github.com:', 'http': 'https://github.com/'}
     }

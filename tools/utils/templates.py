@@ -1,5 +1,3 @@
-from pprint import pp
-
 import yaml
 from jinja2 import Environment, FileSystemLoader, Template
 
@@ -8,8 +6,9 @@ class Templates:
     base_path: str
     env: Environment
 
-    def __init__(self, base_path):
+    def __init__(self, base_path, project_config):
         self.base_path = base_path
+        self.project_config = project_config
         self.env = Environment(
             loader=FileSystemLoader(base_path),
             block_start_string='%{',
@@ -34,8 +33,7 @@ class Templates:
             Loader=yaml.FullLoader
         )
 
-    @staticmethod
-    def version(service, name, defaults) -> str:
+    def version(self, service, name) -> str:
         version = None
         if hasattr(service, 'version'):
             version_attr = service.version
@@ -45,7 +43,7 @@ class Templates:
                 elif name in version_attr:
                     version = version_attr[name]
         if not version:
-            version = defaults[name]['version']
+            version = self.project_config.defaults[name]['version']
         return version
 
     @staticmethod
