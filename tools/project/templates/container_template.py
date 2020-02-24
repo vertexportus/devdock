@@ -1,3 +1,4 @@
+from project.generation import generate_build_files
 from utils import env
 from utils.templates import Templates
 from utils.yaml_template_object import YamlTemplateObject
@@ -127,8 +128,18 @@ class ContainerTemplate(YamlTemplateObject):
             compose['build'] = {
                 'context': (f"build/{self.service.master.current_env}/"
                             f"{self.service_template.name.replace('.', '/')}/{self.name}"),
-                'args': {k: self._generate_build_arg(v) for k, v in self.image['args'].items()}
+                'args': {k: self._generate_build_arg(v) for k, v in self.image['args'].items()},
             }
+            template_base_path = self.service_template.name.replace('.', '/')
+            build_orig_path = f"{template_base_path}/build/{self.name}"
+            build_dest_path = f"build/{self.service.master.current_env}/{template_base_path}/{self.name}"
+            template_params = {
+                'defaults': self.service.master.defaults,
+                'project': self.service.project,
+                'service': self.service,
+                'siblings': self.service_template.containers
+            }
+            generate_build_files([build_orig_path], build_dest_path, self.service.master.templates, **template_params)
         else:
             compose['image'] = self.image
 
