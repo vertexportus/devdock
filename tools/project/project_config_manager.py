@@ -19,7 +19,9 @@ class ProjectConfigManager:
         return self._config.projects
 
     def generate_docker(self, print_console, for_env=env.env()):
-        pass
+        compose = self._config.get_compose(for_env)
+        print(' ---- ')
+        print(yaml.dump(compose))
         # compose = self._config.get_compose()
         # compose_file_path = env.docker_compose_file_path(for_env)
         # gen_path = os.path.dirname(compose_file_path)

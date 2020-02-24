@@ -5,7 +5,6 @@ containers:
       - postgres
     image:
       name: postgres
-      use_alpine: true
     volumes:
       named:
         data: /var/lib/postgresql/data
@@ -14,12 +13,5 @@ containers:
         POSTGRES_USER: user
         POSTGRES_PASSWORD: password
         POSTGRES_DB: database
-      exported:
-        - user
-        - password
-        - database
-        - port
     ports:
-      db_port:
-        default: 5432
-        env: port
+      db_port: 5432

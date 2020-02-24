@@ -21,3 +21,11 @@ class Project(YamlDataObject):
         self.path = env.project_path(name)
         self.services = {k: Service(k, master=master, data=v, project=self)
                          for k, v in self.try_get('services', {}).items()}
+
+    def post_load_init(self):
+        for service in self.services.values():
+            service.post_load_init()
+
+    def generate_compose(self, compose_services, compose_volumes):
+        for service in self.services.values():
+            service.generate_compose(compose_services, compose_volumes)

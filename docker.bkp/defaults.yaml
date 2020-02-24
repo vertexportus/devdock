@@ -7,6 +7,8 @@ postgres:
   version: 12
 php:
   version: 7.4
+xdebug:
+  version: 2.8.1
 nginx:
   version: 1.17
 elixir:

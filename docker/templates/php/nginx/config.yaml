@@ -1,0 +1,59 @@
+required:
+  - database
+containers:
+  php:
+    stack:
+      - php
+    build:
+      name: php
+      suffix: -fpm
+      use_alpine: true
+      args:
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+        XDEBUG_ENABLE:
+          env: xdebug_enable
+          nested_prefix: true
+          default: 0
+        XDEBUG_VERSION:
+          env: xdebug_version
+          nested_prefix: true
+          default: %= defaults|version('php.xdebug') =%
+        XDEBUG_REMOTE_HOST: ${XDEBUG_REMOTE_HOST}
+        XDEBUG_REMOTE_PORT:
+          env: xdebug_remove_port
+          default: 9000
+        XDEBUG_IDEKEY:
+          env: xdebug_idekey
+          default: PHPSTORM
+    volumes:
+      mapped:
+        - %= project.path =%:/var/www
+    env:
+      imported:
+        DB_USER: database.user
+        DB_PASSWORD: database.password
+        DB_PORT: database.port
+        DB_HOST: database.host
+  web:
+    stack:
+      - http
+      - nginx
+    build:
+      name: nginx
+      use_alpine: true
+      args:
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+    volumes:
+      mapped:
+        - %= project.path =%:/var/www
+    depends_on:
+      - php
+    env:
+      exported:
+        - http_port
+        - https_port
+    ports:
+      http_port: 8080
+      https_port: 8443

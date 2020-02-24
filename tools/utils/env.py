@@ -57,3 +57,15 @@ def docker_compose_file_path(for_env=None) -> str:
 
 def git_use_ssh():
     return bool(os.environ['GIT_USE_SSH']) if 'GIT_USE_SSH' in os.environ else True
+
+
+def env_var_format(var_name, default=None, open_symbol='${', close_symbol='}'):
+    return (f"{open_symbol}{var_name}{':-' if default is not None else ''}"
+            f"{default if default is not None else ''}{close_symbol}")
+
+
+def env_var_nested_format(var_name, default_var_name, default=None):
+    return env_var_format(
+        var_name,
+        env_var_format(default_var_name, default)
+    )

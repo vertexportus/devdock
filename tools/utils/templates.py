@@ -1,4 +1,5 @@
 import yaml
+from dict_deep import deep_get
 from jinja2 import Environment, FileSystemLoader, Template
 
 
@@ -43,7 +44,7 @@ class Templates:
                 elif name in version_attr:
                     version = version_attr[name]
         if not version:
-            version = self.project_config.defaults[name]['version']
+            version = deep_get(self.project_config.defaults, f"{name}.version")
         return version
 
     @staticmethod
