@@ -53,6 +53,7 @@ class ServiceTemplate(YamlTemplateObject):
             'service': self.service,
             'siblings': self.containers
         }
-        dest_path = f"build/{self.service.master.current_env}"
+        dest_path = (f"build/{self.service.master.current_env}/"
+                     f"{self.base_path if type(self.base_path) == str else self.base_path[len(self.base_path) - 1]}")
         paths = list(map(lambda x: f"{x}/build", self.base_path if type(self.base_path) == list else [self.base_path]))
         generate_build_files(paths, dest_path, self.templates, **template_params)

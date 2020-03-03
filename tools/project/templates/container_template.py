@@ -130,16 +130,6 @@ class ContainerTemplate(YamlTemplateObject):
                             f"{self.service_template.name.replace('.', '/')}/{self.name}"),
                 'args': {k: self._generate_build_arg(v) for k, v in self.image['args'].items()},
             }
-            template_base_path = self.service_template.name.replace('.', '/')
-            build_orig_path = f"{template_base_path}/build/{self.name}"
-            build_dest_path = f"build/{self.service.master.current_env}/{template_base_path}/{self.name}"
-            template_params = {
-                'defaults': self.service.master.defaults,
-                'project': self.service.project,
-                'service': self.service,
-                'siblings': self.service_template.containers
-            }
-            generate_build_files([build_orig_path], build_dest_path, self.service.master.templates, **template_params)
         else:
             compose['image'] = self.image
 
@@ -174,6 +164,8 @@ class ContainerTemplate(YamlTemplateObject):
             compose['environment'] = environment
 
     def _generate_compose_ports(self, compose):
+        if not hasattr(self, 'ports'):
+            return
         ports = None
         service_ports_config = self.service_template.service.ports
         if type(service_ports_config) == bool:
