@@ -11,6 +11,7 @@ RUN set -x && apk del .shadow
 
 # nginx conf
 RUN set -x && rm -f /etc/nginx/conf.d/default.conf
+COPY config/nginx-php.conf /etc/nginx/conf.d/phpupstream.conf
 COPY config/nginx-site.conf /etc/nginx/sites-available/default.conf
 COPY config/nginx.conf /etc/nginx/nginx.conf
 
@@ -20,5 +21,5 @@ COPY config/nginx.conf /etc/nginx/nginx.conf
 
 # finalize and run
 WORKDIR /var/www
-EXPOSE 80 443
+EXPOSE 8080 8443
 CMD ["nginx"]

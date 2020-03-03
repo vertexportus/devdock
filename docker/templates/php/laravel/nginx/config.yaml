@@ -1,52 +1,5 @@
-required:
-  - database
+inherits: php.nginx
 containers:
   php:
     stack:
-      - php
-    build:
-#      context: build/% env.env =%/php/nginx/php
-      args:
-#        TAG: % service|version('php', defaults) =%-fpm-alpine
-        USERID: ${USERID}
-        GROUPID: ${GROUPID}
-        XDEBUG_ENABLE: ${%= project.name|upper =%_XDEBUG_ENABLE:-${XDEBUG_ENABLE:-0}}
-        XDEBUG_VERSION: ${%= project.name|upper =%_XDEBUG_VERSION:-${XDEBUG_VERSION:-2.8.1}}
-        XDEBUG_REMOTE_HOST: ${XDEBUG_REMOTE_HOST}
-        XDEBUG_REMOTE_PORT: ${XDEBUG_REMOTE_PORT:-""}
-        XDEBUG_IDEKEY: ${XDEBUG_IDEKEY:-""}
-    volumes:
-      mapped:
-#        - % project.path =%:/var/www
-    env:
-      imported:
-        DB_USER: database.user
-        DB_PASSWORD: database.password
-        DB_PORT: database.port
-        DB_HOST: database.host
-  web:
-    stack:
-      - http
-      - nginx
-    build:
-#      context: build/% env.env =%/php/nginx/web
-      args:
-#        TAG: % service|version('nginx', defaults) =%-alpine
-        USERID: ${USERID}
-        GROUPID: ${GROUPID}
-    volumes:
-      mapped:
-#        - % project.path =%:/var/www
-    depends_on:
-      - php
-    env:
-      exported:
-        - http_port
-        - https_port
-    ports:
-      http_port:
-        default: 8080
-        env: http_port
-      https_port:
-        default: 8443
-        env: https_port
+      - laravel
