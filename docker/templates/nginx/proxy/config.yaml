@@ -1,0 +1,20 @@
+required:
+  - targets
+containers:
+  web:
+    stack:
+      - http
+      - nginx
+    build:
+      name: nginx
+      use_alpine: true
+      args:
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+    env:
+      exported:
+        - http_port
+        - https_port
+    ports:
+      http_port: 80
+      https_port: 443

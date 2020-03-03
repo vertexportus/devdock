@@ -1,0 +1,2 @@
+params:
+  targets: %= service.get_required('targets') =%

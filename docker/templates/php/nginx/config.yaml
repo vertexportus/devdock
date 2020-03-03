@@ -1,5 +1,6 @@
 required:
   - database
+entrypoint: web
 containers:
   php:
     stack:

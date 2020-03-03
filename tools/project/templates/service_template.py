@@ -1,3 +1,7 @@
+import os
+
+import yaml
+
 from utils import env
 from .container_template import ContainerTemplate
 from utils.yaml_template_object import YamlTemplateObject
@@ -9,11 +13,16 @@ class ServiceTemplate(YamlTemplateObject):
     yaml_tag = '!ServiceTemplate'
     name: str
     base_path: str or list
+    entrypoint: str
     containers: dict
+    params: dict
 
     @property
     def is_single_container(self) -> bool:
         return len(self.containers) < 2
+
+    def entrypoint_container(self) -> ContainerTemplate:
+        return self.containers[self.entrypoint]
 
     def __init__(self, service, name):
         self.service = service
@@ -36,8 +45,15 @@ class ServiceTemplate(YamlTemplateObject):
             self.merge_load_template_data(f"{self.base_path[0]}/config.yaml")
         self.containers = {k: ContainerTemplate(k, self, templates, template_params, v)
                            for k, v in self.try_get('containers', {}).items()}
+        self.entrypoint = self.try_get('entrypoint', next(iter(self.containers.keys())))
 
     def post_load_init(self):
+        template_paths = self.base_path if type(self.base_path) == list else [self.base_path]
+        for path in template_paths:
+            post_init_file_path = f"{path}/post_init.yaml"
+            if os.path.isfile(env.docker_template_path(post_init_file_path)):
+                self.merge_load_template_data(post_init_file_path)
+        self.params = self.try_get('params', {})
         for container in self.containers.values():
             container.post_load_init()
 
@@ -48,6 +64,7 @@ class ServiceTemplate(YamlTemplateObject):
 
     def generate_build_files(self):
         template_params = {
+            **self.params,
             'defaults': self.service.master.defaults,
             'project': self.service.project,
             'service': self.service,
