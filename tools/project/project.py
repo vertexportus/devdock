@@ -22,6 +22,10 @@ class Project(YamlDataObject):
         self.services = {k: Service(k, master=master, data=v, project=self)
                          for k, v in self.try_get('services', {}).items()}
 
+    def define_container_names(self):
+        for service in self.services.values():
+            service.define_container_names()
+
     def post_load_init(self):
         for service in self.services.values():
             service.post_load_init()

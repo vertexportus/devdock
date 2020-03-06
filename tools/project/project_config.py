@@ -27,6 +27,11 @@ class ProjectConfig(YamlDataObject):
         self.devdock = ProjectRepo(None, self.get_required('devdock'))
         self.projects = {k: Project(k, master=self, data=v) for k, v in self.try_get('projects', {}).items()}
         self.services = {k: Service(k, master=self, data=v) for k, v in self.try_get('services', {}).items()}
+        # container names
+        for service in self.services.values():
+            service.define_container_names()
+        for project in self.projects.values():
+            project.define_container_names()
         # post load init
         for service in self.services.values():
             service.post_load_init()
@@ -60,10 +65,14 @@ class ProjectConfig(YamlDataObject):
     def get_container_by_path(self, container_path):
         container = None
         if '.' in container_path:
-            raise Exception("TODO: get_container_by_path with . path")
+            raise Exception(f"TODO: get_container_by_path with . path {container_path=}")
         else:
             if container_path in self.services:
                 container = self.services[container_path].get_container_by_path(container_path)
+            elif container_path in self.projects:
+                if container_path in self.projects[container_path].services:
+                    container = self.projects[container_path].services[container_path] \
+                        .get_container_by_path(container_path)
         if not container:
             raise Exception(f"can't find container by path '{container_path}'")
         return container

@@ -21,6 +21,7 @@ class Templates:
         )
         self.env.filters['version'] = self.version
         self.env.filters['dmap'] = self.dmap
+        self.env.filters['map_containers_fullname'] = self.map_containers_fullname
 
     def get_template(self, path) -> Template:
         return self.env.get_template(path)
@@ -51,7 +52,12 @@ class Templates:
     def dmap(dictionary, fn) -> dict:
         return {k: fn(v) for k, v in dictionary.items()}
 
+    @staticmethod
+    def map_containers_fullname(containers, master):
+        if type(containers) == dict:
+            return {k: master.get_container_by_path(v).fullname for k, v in containers.items()}
+        else:
+            return list(map(lambda x: master.get_container_by_path(x).fullname, containers))
+
     def __deepcopy__(self, memodict=None):
-        if memodict is None:
-            memodict = {}
         return {}

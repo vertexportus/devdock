@@ -28,10 +28,12 @@ class ContainerTemplate(YamlTemplateObject):
         self._parse_env()
         self._parse_ports()
 
-    def post_load_init(self):
+    def define_container_name(self):
         base_name = f"{self.service.project.name}_{self.service.name}" \
             if self.service.project and self.service.project.name != self.service.name else self.service.name
         self.fullname = f"{base_name}_{self.name}" if not self.service_template.is_single_container else base_name
+
+    def post_load_init(self):
         self._parse_env_imported()
 
     def _parse_tech_stack(self):
@@ -185,3 +187,19 @@ class ContainerTemplate(YamlTemplateObject):
                             f"service {self.service_template.service.name}")
         if ports:
             compose['ports'] = ports
+
+    def generate_build_files(self):
+        template_params = {
+            **self.service_template.params,
+            'master': self.service.master,
+            'defaults': self.service.master.defaults,
+            'project': self.service.project,
+            'service': self.service,
+            'siblings': self.service_template.containers
+        }
+        base_path = self.service_template.base_path
+        dest_path = (f"build/{self.service.master.current_env}/"
+                     f"{base_path if type(base_path) == str else base_path[len(base_path) - 1]}/"
+                     f"{self.name}")
+        paths = list(map(lambda x: f"{x}/build/{self.name}", base_path if type(base_path) == list else [base_path]))
+        generate_build_files(paths, dest_path, self.templates, **template_params)

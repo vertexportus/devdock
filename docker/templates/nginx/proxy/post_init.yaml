@@ -1,2 +1,2 @@
 params:
-  targets: %= service.get_required('targets') =%
+  targets: %= service.get_required('targets')|map_containers_fullname(master) =%

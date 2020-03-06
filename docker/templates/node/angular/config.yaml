@@ -1,0 +1,20 @@
+containers:
+  angular:
+    stack:
+      - node
+      - angular
+    build:
+      name: node
+      use_alpine: true
+      args:
+        ANGULAR_VERSION: %= defaults|version('angular') =%
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+    volumes:
+      mapped:
+        - %= project.path =%:/app
+    env:
+      mapped:
+        - base_url
+    ports:
+      http_port: 4200

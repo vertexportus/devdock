@@ -27,6 +27,9 @@ class Service(YamlDataObject):
         self.tech_stack = []
         self.template = ServiceTemplate(service=self, name=self.get_required('template'))
 
+    def define_container_names(self):
+        self.template.define_container_names()
+
     def post_load_init(self):
         self.template.post_load_init()
 
@@ -51,4 +54,7 @@ class Service(YamlDataObject):
         if container_path == self.name and self.template.is_single_container:
             return next(iter(self.template.containers.values()))
         else:
-            return self.template.containers[container_path] if container_path in self.template.containers else None
+            if self.template.entrypoint:
+                return self.template.containers[self.template.entrypoint]
+            else:
+                return self.template.containers[container_path] if container_path in self.template.containers else None
