@@ -46,7 +46,7 @@ class Docker(base_command.BaseCommand):
     def _up_handler(self):
         if self.args.generate:
             print(utils.colors.blue("generating docker config..."))
-            self.project_config.generate_docker(False)
+            self.project.generate_docker(False)
         else:
             self._check_docker_config(gen=True)
         if self.args.rebuild:
@@ -67,7 +67,7 @@ class Docker(base_command.BaseCommand):
     def _build_handler(self):
         if self.args.generate:
             print(utils.colors.blue("generating docker config..."))
-            self.project_config.generate_docker(False)
+            self.project.generate_docker(False)
         else:
             self._check_docker_config(gen=True)
         containers = ' '.join(list(map(lambda x: self.__get_container_name(x), self.args.containers)))\
@@ -93,12 +93,12 @@ class Docker(base_command.BaseCommand):
     def _check_docker_config(self, gen=False):
         if not os.path.isfile(env.docker_compose_file_path()):
             if gen:
-                self.project_config.generate_docker(False)
+                self.project.generate_docker(False)
             else:
                 raise Exception(f"no docker-compose file generated yet for current ENV ({env.env()})")
 
     def __get_container_name(self, path):
-        container = self.project_config.get_container_name_by_simple_path(path)
+        container = self.project.get_container_name_by_simple_path(path)
         if not container:
             raise Exception(f"container related to path '{path}' not found")
         return container

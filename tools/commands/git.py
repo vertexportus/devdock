@@ -1,5 +1,8 @@
 import argparse
+import os
+
 import git
+import yaml
 from git import Repo
 from utils import GitProgress
 from utils.colors import *
@@ -25,15 +28,15 @@ class Git(base_command.BaseCommand):
             self._default_handler()
 
     def _clone_handler(self):
-        projects = self.project_config.get_projects()
+        projects = self.project.get_projects()
         if 'all' in self.args.project:
-            self.__git_clone('devdock', self.project_config.devdock.repo.url)
+            self.__git_clone('devdock', self.project.config.devdock.url)
             for project, project_config in projects.items():
                 self.__git_clone(project, project_config.repo.url)
         else:
             project = self.args.project
             if project == 'devdock':
-                self.__git_clone('devdock', self.project_config.devdock.repo.url)
+                self.__git_clone('devdock', self.project.config.devdock.url)
             elif project in projects.keys():
                 self.__git_clone(project, projects[project].repo.url)
             else:
@@ -45,8 +48,11 @@ class Git(base_command.BaseCommand):
     @staticmethod
     def __git_clone(project, repo_url):
         print(blue(f"cloning repository for {project}"))
-        try:
-            Repo.clone_from(repo_url, project, progress=GitProgress())
-        except git.exc.GitCommandError as git_error:
-            print(red(f"Error cloning '{project}'\n"))
-            raise git_error
+        if os.path.exists(project):
+            print(f"{project} already exists")
+        else:
+            try:
+                Repo.clone_from(repo_url, project, progress=GitProgress())
+            except git.exc.GitCommandError as git_error:
+                print(red(f"Error cloning '{project}'\n"))
+                raise git_error

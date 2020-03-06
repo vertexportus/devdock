@@ -14,7 +14,7 @@ class BaseCommand(ABC):
         return cls(project_config_manager, args)
 
     @property
-    def project_config(self):
+    def project(self):
         return self.__project_config_manager
 
     @property

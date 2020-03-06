@@ -127,9 +127,10 @@ class ContainerTemplate(YamlTemplateObject):
 
     def _generate_compose_image(self, compose):
         if self.is_build:
+            path_suffix = f"/{self.name}" if not self.service_template.is_single_container else ""
             compose['build'] = {
                 'context': (f"build/{self.service.master.current_env}/"
-                            f"{self.service_template.name.replace('.', '/')}/{self.name}"),
+                            f"{self.service_template.name.replace('.', '/')}{path_suffix}"),
                 'args': {k: self._generate_build_arg(v) for k, v in self.image['args'].items()},
             }
         else:
@@ -198,8 +199,8 @@ class ContainerTemplate(YamlTemplateObject):
             'siblings': self.service_template.containers
         }
         base_path = self.service_template.base_path
+        path_suffix = f"/{self.name}" if not self.service_template.is_single_container else ""
         dest_path = (f"build/{self.service.master.current_env}/"
-                     f"{base_path if type(base_path) == str else base_path[len(base_path) - 1]}/"
-                     f"{self.name}")
-        paths = list(map(lambda x: f"{x}/build/{self.name}", base_path if type(base_path) == list else [base_path]))
+                     f"{base_path if type(base_path) == str else base_path[len(base_path) - 1]}{path_suffix}")
+        paths = list(map(lambda x: f"{x}/build{path_suffix}", base_path if type(base_path) == list else [base_path]))
         generate_build_files(paths, dest_path, self.templates, **template_params)

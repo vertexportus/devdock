@@ -7,6 +7,10 @@ from utils import env
 
 
 class ProjectConfigManager:
+    @property
+    def config(self):
+        return self._config
+
     @staticmethod
     def config_exists():
         return os.path.isfile(env.project_config_file_path())

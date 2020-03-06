@@ -34,7 +34,7 @@ class Config(base_command.BaseCommand):
 
     def _docker_handler(self):
         if self.args.generate:
-            self.project_config.generate_docker(self.args.print, self.args.env)
+            self.project.generate_docker(self.args.print, self.args.env)
 
     def _env_handler(self):
         base_vars = [
