@@ -1,5 +1,7 @@
 required:
   - targets
+params:
+  targets: %= service.get_required('targets') =%
 containers:
   web:
     stack:
