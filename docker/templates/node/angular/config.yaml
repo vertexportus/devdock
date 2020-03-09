@@ -17,4 +17,4 @@ containers:
       mapped:
         - base_url
     ports:
-      http_port: 4200
+      http: 4200

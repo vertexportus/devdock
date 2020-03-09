@@ -14,4 +14,4 @@ containers:
         POSTGRES_PASSWORD: password
         POSTGRES_DB: database
     ports:
-      db_port: 5432
+      db: 5432

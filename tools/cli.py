@@ -14,7 +14,8 @@ command_modules = {
     "git": None,
     "config": None,
     "composer": 'php',
-    "laravel": 'laravel'
+    "laravel": 'laravel',
+    "npm": 'node',
 }
 
 

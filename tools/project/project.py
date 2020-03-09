@@ -19,6 +19,7 @@ class Project(YamlDataObject):
         self.name = name
         self.repo = ProjectRepo(self, data)
         self.path = env.project_path(name)
+        self.tech_stack = []
         self.services = {k: Service(k, master=master, data=v, project=self)
                          for k, v in self.try_get('services', {}).items()}
 
@@ -33,3 +34,9 @@ class Project(YamlDataObject):
     def generate_compose(self, compose_services, compose_volumes):
         for service in self.services.values():
             service.generate_compose(compose_services, compose_volumes)
+
+    def get_service_by_tech(self, tech):
+        return next(iter(filter(lambda x: tech in x.tech_stack, self.services.values())))
+
+    def append_tech_stack(self, tech_stack):
+        self.tech_stack += tech_stack

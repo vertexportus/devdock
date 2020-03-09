@@ -21,5 +21,5 @@ COPY config/nginx.conf /etc/nginx/nginx.conf
 
 # finalize and run
 WORKDIR /var/www
-EXPOSE 8080 8443
+EXPOSE 80 443
 CMD ["nginx"]

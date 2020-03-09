@@ -38,6 +38,8 @@ class Service(YamlDataObject):
 
     def append_tech_stack(self, tech_stack):
         self.tech_stack += tech_stack
+        if self.project:
+            self.project.append_tech_stack(tech_stack)
 
     def get_image_version(self, name):
         if self.version:

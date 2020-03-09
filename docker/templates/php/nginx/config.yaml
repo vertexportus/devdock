@@ -56,5 +56,5 @@ containers:
         - http_port
         - https_port
     ports:
-      http_port: 8080
-      https_port: 8443
+      http: 80
+      https: 443

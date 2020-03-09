@@ -76,3 +76,6 @@ class ProjectConfig(YamlDataObject):
         if not container:
             raise Exception(f"can't find container by path '{container_path}'")
         return container
+
+    def get_container_name_by_path(self, container_path):
+        return self.get_container_by_path(container_path).fullname

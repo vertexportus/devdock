@@ -1,3 +1,5 @@
+import yaml
+
 from project.generation import generate_build_files
 from utils import env
 from utils.templates import Templates
@@ -111,7 +113,7 @@ class ContainerTemplate(YamlTemplateObject):
                 env_prefix = self.service_template.service.env_prefix
                 env_port_name = port_name.upper()
                 if not env_port_name.startswith(env_prefix):
-                    env_port_name = f"{env_prefix}_{env_port_name}"
+                    env_port_name = f"{env_prefix}_{env_port_name}_PORT"
                 self.ports[port_name] = {
                     'default': port,
                     'env': env_port_name
@@ -178,6 +180,7 @@ class ContainerTemplate(YamlTemplateObject):
                     ports.append(f"{env.env_var_format(port_config['env'], port_config['default'])}"
                                  f":{port_config['default']}")
         elif type(service_ports_config) == list:
+            ports = []
             for port_name, port_config in self.ports.items():
                 if port_name not in service_ports_config:
                     continue
