@@ -48,6 +48,8 @@ class ContainerTemplate(YamlTemplateObject):
         if env_name == 'host':
             return self.fullname
         env_full_name = f"{env_prefix}_{env_name}".upper()
+        if env_name == 'port':
+            return env_full_name
         if env_full_name in self.env:
             return env_full_name
         for port_config in self.ports.values():
