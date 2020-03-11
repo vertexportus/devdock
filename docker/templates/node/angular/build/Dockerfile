@@ -20,4 +20,4 @@ ENV PATH /app/node_modules/.bin:$PATH
 # finalize and run
 WORKDIR /app
 EXPOSE 4200
-CMD ["sh", "-c", "ng serve --public-host $BASE_URL --host 0.0.0.0"]
+CMD ["sh", "-c", "ng serve --host 0.0.0.0 --disableHostCheck"]
