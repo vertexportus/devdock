@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+from deepmerge import always_merger
+
 from utils.templates import Templates
 from utils.yaml_data_object import YamlDataObject
 
@@ -26,7 +28,7 @@ class YamlTemplateObject(YamlDataObject):
         self._data = self.load_template(template_name)
 
     def merge_load_template_data(self, template_name):
-        self._data = {**self._data, **self.load_template(template_name)}
+        self._data = always_merger.merge(self._data, self.load_template(template_name))
 
     def load_template(self, template_name) -> dict:
         return self.templates.render_template_yaml(template_name, **self.template_params)

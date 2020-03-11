@@ -3,3 +3,12 @@ containers:
   php:
     stack:
       - laravel
+    env:
+      files:
+        - .env
+        - .laravel.env
+  web:
+    env:
+      files:
+        - .env
+        - .laravel.env

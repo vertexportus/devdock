@@ -1,6 +1,8 @@
 import yaml
 from copy import deepcopy
 
+from dict_deep import deep_get
+
 
 class YamlDataObject(yaml.YAMLObject):
     base_hidden_fields = ['_data']
@@ -25,7 +27,11 @@ class YamlDataObject(yaml.YAMLObject):
         self._data = self.load(file_path)
 
     def try_get(self, prop, default):
-        return self._data[prop] if prop in self._data else default
+        if '.' in prop:
+            value = deep_get(self._data, prop)
+            return value if value else default
+        else:
+            return self._data[prop] if prop in self._data else default
 
     def get_required(self, prop):
         if prop not in self._data:
