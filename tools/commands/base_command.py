@@ -45,6 +45,18 @@ class BaseCommand(ABC):
         for output in result.output:
             print(output.decode('utf-8'), end='')
 
+    def container_exec_run_get_output(self, container_short_name, command):
+        container = self.get_container_by_short_name(container_short_name)
+        if container is None:
+            raise Exception(f"container '{container_short_name}' not found")
+        result = container.exec_run(command, stream=True, demux=False)
+        output_result = ""
+        for output in result.output:
+            output_str = output.decode('utf-8')
+            output_result += output_str
+            print(output_str, end='')
+        return output_result
+
     @staticmethod
     def get_container_by_short_name(short_name):
         base_name = f"{env.compose_project_name()}_{short_name}"

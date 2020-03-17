@@ -38,5 +38,9 @@ class Project(YamlDataObject):
     def get_service_by_tech(self, tech):
         return next(iter(filter(lambda x: tech in x.tech_stack, self.services.values())))
 
+    def get_container_by_tech(self, tech):
+        service = self.get_service_by_tech(tech)
+        return service.get_container_by_tech(tech)
+
     def append_tech_stack(self, tech_stack):
         self.tech_stack += tech_stack

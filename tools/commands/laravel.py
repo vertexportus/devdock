@@ -1,6 +1,8 @@
 import argparse
+import re
 
 from commands import base_command
+from utils import env, file_regex_replace
 
 
 class Laravel(base_command.BaseCommand):
@@ -12,8 +14,13 @@ class Laravel(base_command.BaseCommand):
 
     def process_command(self):
         project = self.get_project_by_name_or_default_by_tech(self.args.project, 'laravel')
-        container = project.get_container_by_stack('laravel')
+        container = project.get_container_by_tech('laravel')
         if container is None:
             raise Exception(f"container not found by stack")
         params = ' '.join(self.args.params) if len(self.args.params) else ''
-        self.container_exec_run(container.fullname, f"php artisan {params}")
+        if 'key:generate' in self.args.params:
+            params = f"{params} --show"
+            key = self.container_exec_run_get_output(container.fullname, f"php artisan {params}")
+            file_regex_replace(env.project_path(f".{container.service.name}.env"), r"APP_KEY=[a-zA-Z0-9:]*\n", f"APP_KEY={key.strip()}\n")
+        else:
+            self.container_exec_run(container.fullname, f"php artisan {params}")

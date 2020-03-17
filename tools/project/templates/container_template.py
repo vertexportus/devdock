@@ -172,7 +172,11 @@ class ContainerTemplate(YamlTemplateObject):
         if self.service.env_files:
             env_files = self.try_get('env.files', False)
             if env_files:
-                compose['env_file'] = [env.project_path(e) for e in env_files]
+                if type(env_files) == bool:
+                    files = [".env", f".{self.service.name}.env"]
+                else:
+                    files = env_files
+                compose['env_file'] = [env.project_path(f) for f in files]
 
     def _generate_compose_ports(self, compose):
         if not hasattr(self, 'ports'):
