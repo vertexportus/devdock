@@ -14,23 +14,30 @@ export COMPOSE_FILE="$DEVDOCK_PATH/docker/gen/docker-compose-$ENV.yaml"
 export USERID=$(id -u)
 export GROUPID=$(id -g)
 
+devdock_utils=$DEVDOCK_PATH/env/utils
 # url
-url=$(python3 $DEVDOCK_PATH/env/utils/get_env_url.py)
+url=$(python3 $devdock_utils/get_env_url.py)
 if [[ -n $url ]]; then export BASE_URL=$url; else export BASE_URL=localhost; fi
 
-# php xdebug
-php=$(python3 $DEVDOCK_PATH/env/utils/get_tech_version.py php)
+# php
+php=$(python3 $devdock_utils/get_tech_version.py php)
 if [[ -n $php ]]; then
   if [[ -z $XDEBUG_ENABLE ]]; then export XDEBUG_ENABLE=0; fi
   export XDEBUG_REMOTE_HOST=$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+')
 fi
 
 # node
-node=$(python3 $DEVDOCK_PATH/env/utils/get_tech_version.py node)
-angular=$(python3 $DEVDOCK_PATH/env/utils/get_tech_version.py angular)
+node=$(python3 $devdock_utils/get_tech_version.py node)
+angular=$(python3 $devdock_utils/get_tech_version.py angular)
 
 # dbs
-postgres=$(python3 $DEVDOCK_PATH/env/utils/get_tech_version.py postgres)
+postgres=$(python3 $devdock_utils/get_tech_version.py postgres)
+
+# cloud local services
+minio=$(python3 $devdock_utils/get_tech_version.py minio)
+#if [[ -n $minio ]]; then
+#  echo $(python3 $devdock_utils/get_tech_envs.py minio)
+#fi
 
 ## show information of current env
 echo -e "\e[0;36m Project   :   \e[1;36m$PROJECT_NAME"

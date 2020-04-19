@@ -1,0 +1,20 @@
+containers:
+  minio:
+    stack:
+      - minio
+      - s3
+    build:
+      name: minio
+      use_alpine: false
+    volumes:
+      named:
+        data: /data
+    env:
+      prefixed:
+        MINIO_ACCESS_KEY: access_key
+        MINIO_SECRET_KEY: secret_key
+      exported:
+        - http_port
+    ports:
+      http: 9001:9000
+    command: server /data

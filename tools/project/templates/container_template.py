@@ -18,6 +18,7 @@ class ContainerTemplate(YamlTemplateObject):
     volumes_mapped: list
     env: dict
     ports: dict
+    command: str
 
     def __init__(self, name, service_template, templates: Templates, template_params, data):
         super().__init__(templates, template_params, data=data)
@@ -29,6 +30,7 @@ class ContainerTemplate(YamlTemplateObject):
         self._parse_volumes()
         self._parse_env()
         self._parse_ports()
+        self._parse_command()
 
     def define_container_name(self):
         base_name = f"{self.service.project.name}_{self.service.name}" \
@@ -121,12 +123,16 @@ class ContainerTemplate(YamlTemplateObject):
                     'env': env_port_name
                 }
 
+    def _parse_command(self):
+        self.command = self.try_get('command', None)
+
     def generate_compose(self, compose_services, compose_volumes):
         compose = {}
         self._generate_compose_image(compose)
         self._generate_compose_volumes(compose, compose_volumes)
         self._generate_compose_env(compose)
         self._generate_compose_ports(compose)
+        self._generate_compose_command(compose)
         compose_services[self.fullname] = compose
 
     def _generate_compose_image(self, compose):
@@ -166,7 +172,7 @@ class ContainerTemplate(YamlTemplateObject):
             compose['volumes'] = container_volumes
 
     def _generate_compose_env(self, compose):
-        environment = {v: k for k, v in self.env.items()}
+        environment = {v: f"${{{k}}}" for k, v in self.env.items()}
         if len(environment) > 0:
             compose['environment'] = environment
         if self.service.env_files:
@@ -197,6 +203,10 @@ class ContainerTemplate(YamlTemplateObject):
                             f"service {self.service_template.service.name}")
         if ports:
             compose['ports'] = ports
+
+    def _generate_compose_command(self, compose):
+        if self.command is not None:
+            compose['command'] = self.command
 
     def generate_build_files(self):
         template_params = {

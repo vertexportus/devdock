@@ -54,6 +54,8 @@ class Docker(base_command.BaseCommand):
             self.run_shell("docker-compose build --no-cache")
         up_args = f"--remove-orphans {'' if self.args.attach else '-d'} {'--build' if self.args.build else ''}"
         self.run_shell(f"docker-compose up {up_args}")
+        print()
+        self.run_shell("docker-compose ps")
 
     def _down_handler(self):
         self._check_docker_config()
