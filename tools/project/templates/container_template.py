@@ -181,7 +181,7 @@ class ContainerTemplate(YamlTemplateObject):
             compose['volumes'] = container_volumes
 
     def _generate_compose_env(self, compose):
-        environment = {v: f"${{{k}}}" for k, v in self.env.items()}
+        environment = {v: f"${{{k}}}" if k.isupper() else k for k, v in self.env.items()}
         if len(environment) > 0:
             compose['environment'] = environment
         if self.service.env_files:
