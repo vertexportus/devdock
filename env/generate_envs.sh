@@ -40,9 +40,6 @@ postgres=$(python3 $devdock_utils/get_tech_version.py postgres)
 
 # cloud local services
 minio=$(python3 $devdock_utils/get_tech_version.py minio)
-#if [[ -n $minio ]]; then
-#  echo $(python3 $devdock_utils/get_tech_envs.py minio)
-#fi
 
 ## show information of current env
 echo -e "\e[0;36m Project   :   \e[1;36m$PROJECT_NAME"
@@ -56,4 +53,5 @@ if [[ -n $node ]]; then
 fi
 if [[ -n $dotnetcore ]]; then echo -e "\e[0;36m .net Core :   \e[1;36m$dotnetcore"; fi
 if [[ -n $postgres ]]; then echo -e "\e[0;36m Postgres  :   \e[1;36m$postgres"; fi
+if [[ -n $minio ]]; then echo -e "\e[0;36m Minio(S3) :   \e[1;36m$minio"; fi
 echo -e "\e[0;33m"
