@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2086
+# shellcheck disable=SC2155
 
 # versions
 echo -e "\n\e[0;36mdevdock version: \e[1;36m$([[ -d $DEVDOCK_PATH ]] && cat $DEVDOCK_PATH/VERSION || echo devdock not cloned yet)\e[0;33m"
@@ -28,7 +30,8 @@ fi
 # node
 node=$(python3 $DEVDOCK_PATH/env/utils/get_tech_version.py node)
 angular=$(python3 $DEVDOCK_PATH/env/utils/get_tech_version.py angular)
-
+# dotnetcore
+dotnetcore=$(python3 $DEVDOCK_PATH/env/utils/get_tech_version.py dotnetcore)
 # dbs
 postgres=$(python3 $DEVDOCK_PATH/env/utils/get_tech_version.py postgres)
 
@@ -42,5 +45,6 @@ if [[ -n $node ]]; then
   if [[ -n $angular ]]; then node_adds="(angular: $angular)"; fi
   echo -e "\e[0;36m Node      :   \e[1;36m$node $node_adds"
 fi
-if [[ -n $php ]]; then echo -e "\e[0;36m Postgres  :   \e[1;36m$postgres"; fi
+if [[ -n $dotnetcore ]]; then echo -e "\e[0;36m .net Core :   \e[1;36m$dotnetcore"; fi
+if [[ -n $postgres ]]; then echo -e "\e[0;36m Postgres  :   \e[1;36m$postgres"; fi
 echo -e "\e[0;33m"
