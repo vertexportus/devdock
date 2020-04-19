@@ -17,5 +17,7 @@ node:
   version: 13.7
 angular:
   version: 8.3.24
+dotnetcore:
+  version: 3.1
 minio:
   version: latest

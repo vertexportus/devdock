@@ -4,11 +4,7 @@ containers:
     stack:
       - laravel
     env:
-      files:
-        - .env
-        - .laravel.env
+      files: true
   web:
     env:
-      files:
-        - .env
-        - .laravel.env
+      files: true

@@ -60,3 +60,6 @@ class Service(YamlDataObject):
                 return self.template.containers[self.template.entrypoint]
             else:
                 return self.template.containers[container_path] if container_path in self.template.containers else None
+
+    def get_container_by_tech(self, tech):
+        return next(iter(filter(lambda x: tech in x.tech_stack, self.template.containers.values())))

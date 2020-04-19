@@ -1,0 +1,16 @@
+containers:
+  web:
+    stack:
+      - dotnetcore
+      - aspnet
+    build:
+      name: dotnetcore
+      use_alpine: true
+    volumes:
+      mapped:
+        - %= project.path =%:/app
+    env:
+      exported:
+        - http_port
+    ports:
+      http: 80
