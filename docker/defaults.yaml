@@ -15,6 +15,7 @@ elixir:
   version: 1.9
 node:
   version: 13.7
+  manager: yarn
 angular:
   version: 8.3.24
 dotnetcore:

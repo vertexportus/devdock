@@ -7,7 +7,6 @@ containers:
       name: node
       use_alpine: true
       args:
-        ANGULAR_VERSION: %= defaults|version('angular') =%
         USERID: ${USERID}
         GROUPID: ${GROUPID}
     volumes:

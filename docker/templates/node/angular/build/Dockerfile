@@ -1,10 +1,6 @@
 ARG TAG
 FROM node:$TAG
 
-# install deps
-ARG ANGULAR_VERSION
-RUN set -x && npm install -g @angular/cli@$ANGULAR_VERSION
-
 # set user/group
 RUN set -x && apk add --update --no-cache --virtual .shadow shadow
 ARG USERID
