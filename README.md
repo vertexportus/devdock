@@ -1,23 +1,48 @@
 # devdock
 Set of tools to help manage a docker-oriented development environment
 
-## temp example project.yaml
+## new project
 
-```
+create a new folder, add a `project.yaml` file on it. Example:
+
+```yaml
+devdock:
+  github: vertexportus/devdock.git
+
 projects:
   laravel:
     github: username/laravel.git
     services:
-      laravel:
-        template: php.laravel.nginx
-        database: db
-        ports:
-          - http_port
-        env_files: true
+      api:
+        github: username/apiproject.git
+        services:
+          api:
+            template: php.laravel.nginx
+            database: db
+            env_files: true
+            ports: true
+      frontend:
+        github: vertexportus/frontendproject.git
+        services:
+          frontend:
+            template: node.angular
 
 services:
   db:
     template: postgres
+```
+
+run command:
+```bash
+rq config init
+```
+
+you can change enviroment variables on the `.env` file
+
+to start the containers, you can run docker up with generation:
+
+```bash
+rq docker up --generate
 ```
 
 ## TODO

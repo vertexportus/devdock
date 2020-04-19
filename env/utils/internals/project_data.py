@@ -2,13 +2,18 @@ import yaml
 import os
 
 
-def load_project_and_defaults():
-    defaults_file = f"{os.environ['DEVDOCK_PATH']}/docker/defaults.yaml"
+def load_project():
     project_file = f"{os.environ['PROJECT_PATH']}/project.yaml"
     with open(project_file, 'r') as stream:
         project = yaml.load(stream, Loader=yaml.FullLoader)
+    return project
+
+
+def load_project_and_defaults():
+    defaults_file = f"{os.environ['DEVDOCK_PATH']}/docker/defaults.yaml"
     with open(defaults_file, 'r') as stream:
         defaults = yaml.load(stream, Loader=yaml.FullLoader)
+        project = load_project()
     return project, defaults
 
 
