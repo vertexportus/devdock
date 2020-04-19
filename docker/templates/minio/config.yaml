@@ -18,3 +18,5 @@ containers:
     ports:
       http: 9001:9000
     command: server /data
+    download:
+      config/mc: https://dl.min.io/client/mc/release/linux-amd64/mc

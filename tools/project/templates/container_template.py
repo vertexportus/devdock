@@ -1,4 +1,8 @@
+import os
+
+import requests
 import yaml
+from clint.textui import progress
 
 from project.generation import generate_build_files
 from utils import env
@@ -19,6 +23,7 @@ class ContainerTemplate(YamlTemplateObject):
     env: dict
     ports: dict
     command: str
+    download: dict
 
     def __init__(self, name, service_template, templates: Templates, template_params, data):
         super().__init__(templates, template_params, data=data)
@@ -31,6 +36,7 @@ class ContainerTemplate(YamlTemplateObject):
         self._parse_env()
         self._parse_ports()
         self._parse_command()
+        self._parse_download()
 
     def define_container_name(self):
         base_name = f"{self.service.project.name}_{self.service.name}" \
@@ -125,6 +131,9 @@ class ContainerTemplate(YamlTemplateObject):
 
     def _parse_command(self):
         self.command = self.try_get('command', None)
+
+    def _parse_download(self):
+        self.download = self.try_get('download', None)
 
     def generate_compose(self, compose_services, compose_volumes):
         compose = {}
@@ -227,3 +236,21 @@ class ContainerTemplate(YamlTemplateObject):
                      f"{base_path if type(base_path) == str else base_path[len(base_path) - 1]}{path_suffix}")
         paths = list(map(lambda x: f"{x}/build{path_suffix}", base_path if type(base_path) == list else [base_path]))
         generate_build_files(paths, dest_path, self.templates, **template_params)
+        # download files
+        if self.download is not None:
+            for download_path, download_url in self.download.items():
+                if '/' in download_path:
+                    download_base_path = env.docker_gen_path(f"{dest_path}/{'/'.join(download_path.split('/')[:-1])}")
+                    if not os.path.exists(download_base_path):
+                        os.mkdir(download_base_path)
+                file_dest_path = env.docker_gen_path(f"{dest_path}/{download_path}")
+                if not os.path.isfile(file_dest_path):
+                    req = requests.get(download_url, stream=True)
+                    with open(file_dest_path, 'wb') as f:
+                        total_length = int(req.headers.get('content-length'))
+                        for chunk in progress.bar(req.iter_content(chunk_size=1024),
+                                                  label=f"downloading: {dest_path}/{download_path}  ",
+                                                  expected_size=(total_length / 1024) + 1):
+                            if chunk:
+                                f.write(chunk)
+                                f.flush()
