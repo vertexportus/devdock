@@ -1,7 +1,15 @@
 # devdock
 Set of tools to help manage a docker-oriented development environment
 
-## new project
+## new project (bootstrap)
+
+create a new folder, cd into it and run
+
+```
+curl -s https://raw.githubusercontent.com/vertexportus/devdock/master/env/bootstrap.sh | bash -s
+```
+
+## new project (manually)
 
 create a new folder, add a `project.yaml` file on it. Example:
 
