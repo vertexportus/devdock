@@ -2,3 +2,4 @@ deepmerge==0.1.0
 dict_deep==4.1.0
 PyYAML==5.3
 clint==0.5.1
+jinja2==2.11.2
