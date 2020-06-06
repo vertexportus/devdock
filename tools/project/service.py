@@ -63,3 +63,6 @@ class Service(YamlDataObject):
 
     def get_container_by_tech(self, tech):
         return next(iter(filter(lambda x: tech in x.tech_stack, self.template.containers.values())))
+
+    def get_container_templates(self):
+        return self.template.get_container_templates()

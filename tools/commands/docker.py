@@ -1,4 +1,5 @@
 import os
+import json
 import argparse
 from commands import base_command
 from utils import env
@@ -55,6 +56,7 @@ class Docker(base_command.BaseCommand):
         up_args = f"--remove-orphans {'' if self.args.attach else '-d'} {'--build' if self.args.build else ''}"
         self.run_shell(f"docker-compose up {up_args}")
         print()
+        self.__check_versions()
         self.run_shell("docker-compose ps")
 
     def _down_handler(self):
@@ -104,3 +106,14 @@ class Docker(base_command.BaseCommand):
         if not container:
             raise Exception(f"container related to path '{path}' not found")
         return container
+
+    def __check_versions(self):
+        tech_versions = {}
+        containers = self.project.get_container_templates()
+        for container in containers.values():
+            if container.versioning:
+                for vtech, vcmd in container.versioning.items():
+                    tech_versions[vtech] = self.run_shell_get_output(
+                        f'docker-compose exec {container.fullname} {vcmd}').strip()
+        with open(env.project_path('.versions'), 'w') as stream:
+            stream.write(json.dumps(tech_versions))

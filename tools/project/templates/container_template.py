@@ -24,6 +24,7 @@ class ContainerTemplate(YamlTemplateObject):
     ports: dict
     command: str
     download: dict
+    versioning: dict
 
     def __init__(self, name, service_template, templates: Templates, template_params, data):
         super().__init__(templates, template_params, data=data)
@@ -37,6 +38,7 @@ class ContainerTemplate(YamlTemplateObject):
         self._parse_ports()
         self._parse_command()
         self._parse_download()
+        self._parse_versioning()
 
     def define_container_name(self):
         base_name = f"{self.service.project.name}_{self.service.name}" \
@@ -141,6 +143,9 @@ class ContainerTemplate(YamlTemplateObject):
 
     def _parse_download(self):
         self.download = self.try_get('download', None)
+
+    def _parse_versioning(self):
+        self.versioning = self.try_get('versioning', None)
 
     def generate_compose(self, compose_services, compose_volumes):
         compose = {}

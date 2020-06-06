@@ -55,3 +55,6 @@ class ProjectConfigManager:
 
     def get_project_by_name(self, name):
         return self.config.projects[name] if name in self._config.projects else None
+
+    def get_container_templates(self):
+        return self.config.get_container_templates()

@@ -8,7 +8,7 @@ class Shell(base_command.BaseCommand):
         parser_main.add_argument('container', help="container to run shell in")
 
     def process_command(self):
-        container = self.project_config.get_container_name_by_simple_path(self.args.container)
+        container = self.project.get_container_name_by_simple_path(self.args.container)
         if not container:
             raise Exception(f"container related to path '{self.args.container}' not found")
         self.run_shell(

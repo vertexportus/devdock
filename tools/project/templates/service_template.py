@@ -68,3 +68,6 @@ class ServiceTemplate(YamlTemplateObject):
     def generate_build_files(self):
         for container in self.containers.values():
             container.generate_build_files()
+
+    def get_container_templates(self):
+        return self.containers
