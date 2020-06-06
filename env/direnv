@@ -6,4 +6,4 @@ PATH_add "$PWD/bin"
 # project/docker
 export PROJECT_PATH=$PWD
 export DEVDOCK_PATH=$PROJECT_PATH/devdock
-source $DEVDOCK_PATH/env/generate_envs.sh
+source $DEVDOCK_PATH/env/envs.sh
