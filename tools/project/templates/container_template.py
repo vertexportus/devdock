@@ -86,9 +86,16 @@ class ContainerTemplate(YamlTemplateObject):
     def _get_image_tag(self, data):
         image_name = data['name']
         use_alpine = data['use_alpine'] if 'use_alpine' in data else True
-        return (f"{self.service.get_image_version(image_name)}"
-                f"{data['suffix'] if 'suffix' in data else ''}"
-                f"{'-alpine' if use_alpine else ''}")
+        image_version = self.service.get_image_version(image_name)
+        if image_version != 'latest':
+            image_tag = (f"{image_version}"
+                         f"{data['suffix'] if 'suffix' in data else ''}"
+                         f"{'-alpine' if use_alpine else ''}")
+        else:
+            image_tag = f"{data['suffix'].replace('-','') if 'suffix' in data else ''}"
+        if use_alpine:
+            image_tag = 'alpine' if image_tag == '' else f"{image_tag}-alpine"
+        return image_tag if not '' else 'latest'
 
     def _parse_volumes(self):
         volumes = self._data['volumes'] if 'volumes' in self._data else {}
@@ -225,7 +232,6 @@ class ContainerTemplate(YamlTemplateObject):
         template_params = {
             **self.service_template.params,
             'master': self.service.master,
-            'defaults': self.service.master.defaults,
             'project': self.service.project,
             'service': self.service,
             'siblings': self.service_template.containers

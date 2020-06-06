@@ -1,8 +1,8 @@
 color_dict = {
-    'RED': '1;31',
-    'GREEN': '1;32',
-    'YELLOW': '1;33',
-    'BLUE': '1;36'
+    'RED': '0;31',
+    'GREEN': '0;32',
+    'YELLOW': '0;33',
+    'BLUE': '0;36'
 }
 
 

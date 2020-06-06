@@ -50,7 +50,7 @@ class Service(YamlDataObject):
             else:
                 raise Exception("version not found")
         else:
-            return self.master.defaults[name]['version']
+            return 'latest'  # self.master.defaults[name]['version']
 
     def get_container_by_path(self, container_path):
         if container_path == self.name and self.template.is_single_container:
