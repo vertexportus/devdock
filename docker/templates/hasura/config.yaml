@@ -1,0 +1,18 @@
+containers:
+  postgres:
+    stack:
+      - graphql
+      - hasura
+#    versioning:
+#      postgres: postgres -V | sed 's/^postgres (PostgreSQL) //'
+    image:
+      name: hasura/graphql-engine
+    env:
+      raw:
+        HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      prefixed:
+        HASURA_GRAPHQL_ADMIN_SECRET: admin_secret
+      imported:
+        HASURA_GRAPHQL_DATABASE_URL: postgres://${db.user}:${db.password}@${db.host}:5432/${db.database}
+    ports:
+      http: 8080

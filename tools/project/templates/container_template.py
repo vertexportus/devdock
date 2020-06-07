@@ -109,8 +109,10 @@ class ContainerTemplate(YamlTemplateObject):
         if 'env' in self._data:
             env_config = self._data['env']
             env_prefix = self.service_template.service.env_prefix
-            self.env = {f"{env_prefix}_{v.upper()}": k for k, v in
+            raw = {v: k for k, v in (env_config['raw'] if 'raw' in env_config else {}).items()}
+            prefixed = {f"{env_prefix}_{v.upper()}": k for k, v in
                         (env_config['prefixed'] if 'prefixed' in env_config else {}).items()}
+            self.env = {**raw, **prefixed}
 
     def _parse_env_imported(self):
         if 'env' in self._data:
