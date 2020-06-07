@@ -24,6 +24,7 @@ class ContainerTemplate(YamlTemplateObject):
     ports: dict
     command: str
     download: dict
+    versioning: dict
 
     def __init__(self, name, service_template, templates: Templates, template_params, data):
         super().__init__(templates, template_params, data=data)
@@ -37,6 +38,7 @@ class ContainerTemplate(YamlTemplateObject):
         self._parse_ports()
         self._parse_command()
         self._parse_download()
+        self._parse_versioning()
 
     def define_container_name(self):
         base_name = f"{self.service.project.name}_{self.service.name}" \
@@ -86,9 +88,16 @@ class ContainerTemplate(YamlTemplateObject):
     def _get_image_tag(self, data):
         image_name = data['name']
         use_alpine = data['use_alpine'] if 'use_alpine' in data else True
-        return (f"{self.service.get_image_version(image_name)}"
-                f"{data['suffix'] if 'suffix' in data else ''}"
-                f"{'-alpine' if use_alpine else ''}")
+        image_version = self.service.get_image_version(image_name)
+        if image_version != 'latest':
+            image_tag = (f"{image_version}"
+                         f"{data['suffix'] if 'suffix' in data else ''}"
+                         f"{'-alpine' if use_alpine else ''}")
+        else:
+            image_tag = f"{data['suffix'].replace('-','') if 'suffix' in data else ''}"
+        if use_alpine:
+            image_tag = 'alpine' if image_tag == '' else f"{image_tag}-alpine"
+        return image_tag if not '' else 'latest'
 
     def _parse_volumes(self):
         volumes = self._data['volumes'] if 'volumes' in self._data else {}
@@ -134,6 +143,9 @@ class ContainerTemplate(YamlTemplateObject):
 
     def _parse_download(self):
         self.download = self.try_get('download', None)
+
+    def _parse_versioning(self):
+        self.versioning = self.try_get('versioning', None)
 
     def generate_compose(self, compose_services, compose_volumes):
         compose = {}
@@ -225,7 +237,6 @@ class ContainerTemplate(YamlTemplateObject):
         template_params = {
             **self.service_template.params,
             'master': self.service.master,
-            'defaults': self.service.master.defaults,
             'project': self.service.project,
             'service': self.service,
             'siblings': self.service_template.containers

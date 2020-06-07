@@ -1,28 +1,23 @@
 import argparse
 import sys
 from gettext import gettext
+from utils.colors import color_dict
 
 
 class ColoredArgumentParser(argparse.ArgumentParser):
-    # color_dict is a class attribute, here we avoid compatibility
-    # issues by attempting to override the __init__ method
-    # RED : Error, GREEN : Okay, YELLOW : Warning, Blue: Help/Info
-    color_dict = {'RED': '1;31', 'GREEN': '1;32',
-                  'YELLOW': '1;33', 'BLUE': '1;36'}
-
     def print_usage(self, file=None):
         if file is None:
             file = sys.stdout
         self._print_message(self.format_usage()[0].upper() +
                             self.format_usage()[1:],
-                            file, self.color_dict['YELLOW'])
+                            file, color_dict['YELLOW'])
 
     def print_help(self, file=None):
         if file is None:
             file = sys.stdout
         self._print_message(self.format_help()[0].upper() +
                             self.format_help()[1:],
-                            file, self.color_dict['BLUE'])
+                            file, color_dict['BLUE'])
 
     def _print_message(self, message, file=None, color=None):
         if message:
@@ -37,7 +32,7 @@ class ColoredArgumentParser(argparse.ArgumentParser):
 
     def exit(self, status=0, message=None):
         if message:
-            self._print_message(message, sys.stderr, self.color_dict['RED'])
+            self._print_message(message, sys.stderr, color_dict['RED'])
         sys.exit(status)
 
     def error(self, message):

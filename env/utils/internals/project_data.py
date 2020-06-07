@@ -1,5 +1,5 @@
-import yaml
 import os
+import yaml
 
 
 def load_project():
@@ -24,5 +24,16 @@ def get_services(project):
     return services
 
 
-def filter_services(project, filter_tech=None):
-    return list(filter(lambda x: filter_tech in x['template'], get_services(project)))
+def project_uses_tech(project, filter_tech=None):
+    if not filter_tech:
+        return False
+    services = get_services(project)
+    for service in services:
+        with open(f"devdock/docker/templates/{service['template'].replace('.','/')}/config.yaml") as stream:
+            template_data = stream.read().replace('%=', 'AA')
+            template = yaml.load(template_data, Loader=yaml.FullLoader)
+        for container_template in template['containers'].values():
+            container_stack = container_template['stack'] if 'stack' in container_template else []
+            if filter_tech in container_stack:
+                return True
+    return False

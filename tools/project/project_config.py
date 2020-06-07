@@ -79,3 +79,12 @@ class ProjectConfig(YamlDataObject):
 
     def get_container_name_by_path(self, container_path):
         return self.get_container_by_path(container_path).fullname
+
+    def get_container_templates(self):
+        container_templates = {}
+        for project in self.projects.values():
+            for service in project.services.values():
+                container_templates = {**container_templates, **service.get_container_templates()}
+        for service in self.services.values():
+            container_templates = {**container_templates, **service.get_container_templates()}
+        return container_templates

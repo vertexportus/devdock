@@ -1,6 +1,7 @@
 containers:
   minio:
     stack:
+      - localaws
       - minio
       - s3
     build:

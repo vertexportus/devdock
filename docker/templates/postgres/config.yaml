@@ -3,6 +3,8 @@ containers:
     stack:
       - sql
       - postgres
+    versioning:
+      postgres: postgres -V | sed 's/^postgres (PostgreSQL) //'
     image:
       name: postgres
     volumes:

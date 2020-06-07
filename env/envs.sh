@@ -22,41 +22,35 @@ export USERID=$(id -u)
 export GROUPID=$(id -g)
 
 devdock_utils=$DEVDOCK_PATH/env/utils
+is_tech_used="python3 ${devdock_utils}/is_tech_used.py"
+get_tech_version="python3 $devdock_utils/get_tech_version.py"
 # url
 url=$(python3 $devdock_utils/get_env_url.py)
 if [[ -n $url ]]; then export BASE_URL=$url; else export BASE_URL=localhost; fi
 
 # php
-php=$(python3 $devdock_utils/get_tech_version.py php)
+php=$($is_tech_used minio)
 if [[ -n $php ]]; then
-  if [[ -z $XDEBUG_ENABLE ]]; then export XDEBUG_ENABLE=0; fi
-  export XDEBUG_REMOTE_HOST=$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+')
+  if [[ -z $XDEBUG_ENABLE ]]; then
+    export XDEBUG_ENABLE=0
+  else
+    export XDEBUG_REMOTE_HOST=host.docker.internal
+  fi
 fi
 
-# node
-node=$(python3 $devdock_utils/get_tech_version.py node)
-angular=$(python3 $devdock_utils/get_tech_version.py angular)
-
-# dotnetcore
-dotnetcore=$(python3 $devdock_utils/get_tech_version.py dotnetcore)
-
-# dbs
-postgres=$(python3 $devdock_utils/get_tech_version.py postgres)
-
 # cloud local services
-minio=$(python3 $devdock_utils/get_tech_version.py minio)
+localaws=$($is_tech_used localaws)
+s3=$($is_tech_used minio)
 
 ## show information of current env
 echo -e "${color_text} Project   :   ${color_text_hl}$PROJECT_NAME"
 echo -e "${color_text} Env       :   ${color_text_hl}$ENV"
 echo -e "${color_text} Base URL  :   ${color_text_hl}$BASE_URL"
-if [[ -n $php ]]; then echo -e "${color_text} PHP       :   ${color_text_hl}$php $([ $XDEBUG_ENABLE -eq 0 ] && echo no-xdebug || echo xdebug)"; fi
-if [[ -n $node ]]; then
-  node_adds=
-  if [[ -n $angular ]]; then node_adds="(angular: $angular)"; fi
-  echo -e "${color_text} Node      :   ${color_text_hl}$node $node_adds"
+echo -e "${color_text} Versions  :   ${color_text_hl}$($get_tech_version)"
+if [ $localaws -eq 1 ]; then
+  printf "${color_text} Local AWS :   $color_text_hl"
+  if [ $s3 -eq 1 ]; then echo "S3 "; fi
+else
+  echo -e "${color_text} Local AWS :   ${color_text_hl}None"
 fi
-if [[ -n $dotnetcore ]]; then echo -e "${color_text} .net Core :   ${color_text_hl}$dotnetcore"; fi
-if [[ -n $postgres ]]; then echo -e "${color_text} Postgres  :   ${color_text_hl}$postgres"; fi
-if [[ -n $minio ]]; then echo -e "${color_text} Minio(S3) :   ${color_text_hl}$minio"; fi
 echo -e "${nc}"

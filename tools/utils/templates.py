@@ -37,7 +37,8 @@ class Templates:
             Loader=yaml.FullLoader
         )
 
-    def version(self, service, name) -> str:
+    @staticmethod
+    def version(service, name) -> str:
         version = None
         if hasattr(service, 'version'):
             version_attr = service.version
@@ -47,7 +48,7 @@ class Templates:
                 elif name in version_attr:
                     version = version_attr[name]
         if not version:
-            version = deep_get(self.project_config.defaults, f"{name}.version")
+            version = 'latest'  # deep_get(self.project_config.defaults, f"{name}.version")
         return version
 
     @staticmethod

@@ -36,6 +36,13 @@ class BaseCommand(ABC):
             print(f"+ {command}")
         subprocess.run(command, shell=True)
 
+    @staticmethod
+    def run_shell_get_output(command, echo=False):
+        if echo:
+            print(f"+ {command}")
+        result = subprocess.run(command, capture_output=True, shell=True)
+        return result.stdout.decode('UTF-8')
+
     # docker methods
     def container_exec_run(self, container_short_name, command):
         container = self.get_container_by_short_name(container_short_name)
