@@ -30,7 +30,7 @@ if [[ -n $url ]]; then export BASE_URL=$url; else export BASE_URL=localhost; fi
 
 # php
 php=$($is_tech_used minio)
-if [[ -n $php ]]; then
+if [[ $php  ]]; then
   if [[ -z $XDEBUG_ENABLE ]]; then
     export XDEBUG_ENABLE=0
   else

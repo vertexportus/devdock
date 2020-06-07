@@ -1,4 +1,5 @@
 import os
+import re
 
 import requests
 import yaml
@@ -24,6 +25,7 @@ class ContainerTemplate(YamlTemplateObject):
     ports: dict
     command: str
     download: dict
+    depends_on: list
     versioning: dict
 
     def __init__(self, name, service_template, templates: Templates, template_params, data):
@@ -38,6 +40,7 @@ class ContainerTemplate(YamlTemplateObject):
         self._parse_ports()
         self._parse_command()
         self._parse_download()
+        self._parse_depends_on()
         self._parse_versioning()
 
     def define_container_name(self):
@@ -97,7 +100,7 @@ class ContainerTemplate(YamlTemplateObject):
             image_tag = f"{data['suffix'].replace('-','') if 'suffix' in data else ''}"
         if use_alpine:
             image_tag = 'alpine' if image_tag == '' else f"{image_tag}-alpine"
-        return image_tag if not '' else 'latest'
+        return image_tag if image_tag != '' else 'latest'
 
     def _parse_volumes(self):
         volumes = self._data['volumes'] if 'volumes' in self._data else {}
@@ -109,14 +112,28 @@ class ContainerTemplate(YamlTemplateObject):
         if 'env' in self._data:
             env_config = self._data['env']
             env_prefix = self.service_template.service.env_prefix
-            self.env = {f"{env_prefix}_{v.upper()}": k for k, v in
+            raw = {v: k for k, v in (env_config['raw'] if 'raw' in env_config else {}).items()}
+            prefixed = {f"{env_prefix}_{v.upper()}": k for k, v in
                         (env_config['prefixed'] if 'prefixed' in env_config else {}).items()}
+            self.env = {**raw, **prefixed}
 
     def _parse_env_imported(self):
         if 'env' in self._data:
             env_config = self._data['env']
-            self.env = {**self.env, **{self._import_env(v): k for k, v in
+            self.env = {**self.env, **{self._parse_import_env(v): k for k, v in
                                        (env_config['imported'] if 'imported' in env_config else {}).items()}}
+
+    def _parse_import_env(self, import_data):
+        if '${' in import_data:  # do regex matching
+            result = import_data
+            matches = re.findall(r'\${(\w+\.\w+)}', import_data)
+            for match in matches:
+                result = result.replace(match, self._import_env(match)) \
+                    if 'host' not in match \
+                    else result.replace(f"${{{match}}}", self._import_env(match))
+            return result
+        else:  # direct import
+            return self._import_env(import_data)
 
     def _import_env(self, import_path):
         [attr_name, env_name] = import_path.split('.')
@@ -144,6 +161,9 @@ class ContainerTemplate(YamlTemplateObject):
     def _parse_download(self):
         self.download = self.try_get('download', None)
 
+    def _parse_depends_on(self):
+        self.depends_on = self.try_get('depends_on', None)
+
     def _parse_versioning(self):
         self.versioning = self.try_get('versioning', None)
 
@@ -154,6 +174,7 @@ class ContainerTemplate(YamlTemplateObject):
         self._generate_compose_env(compose)
         self._generate_compose_ports(compose)
         self._generate_compose_command(compose)
+        self._generate_compose_depends_on(compose)
         compose_services[self.fullname] = compose
 
     def _generate_compose_image(self, compose):
@@ -232,6 +253,16 @@ class ContainerTemplate(YamlTemplateObject):
     def _generate_compose_command(self, compose):
         if self.command is not None:
             compose['command'] = self.command
+
+    def _generate_compose_depends_on(self, compose):
+        if self.depends_on:
+            if type(self.depends_on) is dict:
+                internal = self.depends_on['internal'] if 'internal' in self.depends_on else []
+                external = [self._import_env(f"{v}.host") for v in
+                            (self.depends_on['external'] if 'external' in self.depends_on else [])]
+                compose['depends_on'] = internal + external
+            else:
+                compose['depends_on'] = self.depends_on
 
     def generate_build_files(self):
         template_params = {

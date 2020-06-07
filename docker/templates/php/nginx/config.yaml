@@ -22,7 +22,7 @@ containers:
           env: xdebug_version
           nested_prefix: true
           default: %= defaults|version('php.xdebug') =%
-        XDEBUG_REMOTE_HOST: ${XDEBUG_REMOTE_HOST}
+        XDEBUG_REMOTE_HOST: ${XDEBUG_REMOTE_HOST:-""}
         XDEBUG_REMOTE_PORT:
           env: xdebug_remove_port
           default: 9000
