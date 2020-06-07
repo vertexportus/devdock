@@ -1,10 +1,10 @@
 containers:
-  postgres:
+  hasura:
     stack:
       - graphql
       - hasura
-#    versioning:
-#      postgres: postgres -V | sed 's/^postgres (PostgreSQL) //'
+    versioning:
+      hasura: "graphql-engine version | sed 's/^Hasura GraphQL Engine: v//'"
     image:
       name: hasura/graphql-engine
       use_alpine: false

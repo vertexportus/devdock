@@ -84,7 +84,8 @@ class ProjectConfig(YamlDataObject):
         container_templates = {}
         for project in self.projects.values():
             for service in project.services.values():
-                container_templates = {**container_templates, **service.get_container_templates()}
+                container_templates = {**container_templates, **{v.fullname: v for v in service.get_container_templates().values()}}
         for service in self.services.values():
-            container_templates = {**container_templates, **service.get_container_templates()}
+            container_templates = {**container_templates, **{v.fullname: v
+                                                             for v in service.get_container_templates().values()}}
         return container_templates
