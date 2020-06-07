@@ -25,7 +25,7 @@ class ContainerTemplate(YamlTemplateObject):
     ports: dict
     command: str
     download: dict
-    depends_on: list
+    depends_on: list or dict
     versioning: dict
 
     def __init__(self, name, service_template, templates: Templates, template_params, data):
