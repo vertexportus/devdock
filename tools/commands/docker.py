@@ -1,5 +1,5 @@
 import os
-import json
+import yaml
 import argparse
 from commands import base_command
 from utils import env
@@ -116,4 +116,4 @@ class Docker(base_command.BaseCommand):
                     tech_versions[vtech] = self.run_shell_get_output(
                         f'docker-compose exec {container.fullname} {vcmd}').strip()
         with open(env.project_path('.versions'), 'w') as stream:
-            stream.write(json.dumps(tech_versions))
+            stream.write(yaml.dump(tech_versions))
