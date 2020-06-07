@@ -1,4 +1,5 @@
 import os
+import re
 
 import requests
 import yaml
@@ -117,8 +118,20 @@ class ContainerTemplate(YamlTemplateObject):
     def _parse_env_imported(self):
         if 'env' in self._data:
             env_config = self._data['env']
-            self.env = {**self.env, **{self._import_env(v): k for k, v in
+            self.env = {**self.env, **{self._parse_import_env(v): k for k, v in
                                        (env_config['imported'] if 'imported' in env_config else {}).items()}}
+
+    def _parse_import_env(self, import_data):
+        if '${' in import_data:  # do regex matching
+            result = import_data
+            matches = re.findall(r'\${(\w+\.\w+)}', import_data)
+            for match in matches:
+                result = result.replace(match, self._import_env(match)) \
+                    if 'host' not in match \
+                    else result.replace(f"${{{match}}}", self._import_env(match))
+            return result
+        else:  # direct import
+            return self._import_env(import_data)
 
     def _import_env(self, import_path):
         [attr_name, env_name] = import_path.split('.')

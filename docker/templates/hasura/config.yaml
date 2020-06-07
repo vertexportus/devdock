@@ -13,6 +13,6 @@ containers:
       prefixed:
         HASURA_GRAPHQL_ADMIN_SECRET: admin_secret
       imported:
-        HASURA_GRAPHQL_DATABASE_URL: postgres://${db.user}:${db.password}@${db.host}:5432/${db.database}
+        HASURA_GRAPHQL_DATABASE_URL: postgres://${database.user}:${database.password}@${database.host}:5432/${database.database}
     ports:
       http: 8080
