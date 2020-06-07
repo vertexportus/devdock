@@ -113,7 +113,11 @@ class Docker(base_command.BaseCommand):
         for container in containers.values():
             if container.versioning:
                 for vtech, vcmd in container.versioning.items():
-                    tech_versions[vtech] = self.run_shell_get_output(
+                    tech_version = self.run_shell_get_output(
                         f'docker-compose exec {container.fullname} {vcmd}').strip()
+                    if vtech in tech_versions:
+                        tech_versions[vtech] += f" {tech_version}"
+                    else:
+                        tech_versions[vtech] = tech_version
         with open(env.project_path('.versions'), 'w') as stream:
             stream.write(yaml.dump(tech_versions))

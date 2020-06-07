@@ -23,6 +23,7 @@ export GROUPID=$(id -g)
 
 devdock_utils=$DEVDOCK_PATH/env/utils
 is_tech_used="python3 ${devdock_utils}/is_tech_used.py"
+get_tech_version="python3 $devdock_utils/get_tech_version.py"
 # url
 url=$(python3 $devdock_utils/get_env_url.py)
 if [[ -n $url ]]; then export BASE_URL=$url; else export BASE_URL=localhost; fi
@@ -45,6 +46,7 @@ s3=$($is_tech_used minio)
 echo -e "${color_text} Project   :   ${color_text_hl}$PROJECT_NAME"
 echo -e "${color_text} Env       :   ${color_text_hl}$ENV"
 echo -e "${color_text} Base URL  :   ${color_text_hl}$BASE_URL"
+echo -e "${color_text} Versions  :   ${color_text_hl}$($get_tech_version)"
 if [ $localaws -eq 1 ]; then
   printf "${color_text} Local AWS :   $color_text_hl"
   if [ $s3 -eq 1 ]; then echo "S3 "; fi

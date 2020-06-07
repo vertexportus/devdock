@@ -5,6 +5,8 @@ containers:
   php:
     stack:
       - php
+    versioning:
+      PHP: php -v | head -n 1 | cut -d " " -f 2
     build:
       name: php
       suffix: -fpm
