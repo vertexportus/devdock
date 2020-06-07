@@ -7,6 +7,10 @@ containers:
 #      postgres: postgres -V | sed 's/^postgres (PostgreSQL) //'
     image:
       name: hasura/graphql-engine
+      use_alpine: false
+    depends_on:
+      external:
+        - database
     env:
       raw:
         HASURA_GRAPHQL_ENABLE_CONSOLE: "true"

@@ -25,6 +25,7 @@ class ContainerTemplate(YamlTemplateObject):
     ports: dict
     command: str
     download: dict
+    depends_on: list
     versioning: dict
 
     def __init__(self, name, service_template, templates: Templates, template_params, data):
@@ -39,6 +40,7 @@ class ContainerTemplate(YamlTemplateObject):
         self._parse_ports()
         self._parse_command()
         self._parse_download()
+        self._parse_depends_on()
         self._parse_versioning()
 
     def define_container_name(self):
@@ -98,7 +100,7 @@ class ContainerTemplate(YamlTemplateObject):
             image_tag = f"{data['suffix'].replace('-','') if 'suffix' in data else ''}"
         if use_alpine:
             image_tag = 'alpine' if image_tag == '' else f"{image_tag}-alpine"
-        return image_tag if not '' else 'latest'
+        return image_tag if image_tag != '' else 'latest'
 
     def _parse_volumes(self):
         volumes = self._data['volumes'] if 'volumes' in self._data else {}
@@ -159,6 +161,9 @@ class ContainerTemplate(YamlTemplateObject):
     def _parse_download(self):
         self.download = self.try_get('download', None)
 
+    def _parse_depends_on(self):
+        self.depends_on = self.try_get('depends_on', None)
+
     def _parse_versioning(self):
         self.versioning = self.try_get('versioning', None)
 
@@ -169,6 +174,7 @@ class ContainerTemplate(YamlTemplateObject):
         self._generate_compose_env(compose)
         self._generate_compose_ports(compose)
         self._generate_compose_command(compose)
+        self._generate_compose_depends_on(compose)
         compose_services[self.fullname] = compose
 
     def _generate_compose_image(self, compose):
@@ -247,6 +253,16 @@ class ContainerTemplate(YamlTemplateObject):
     def _generate_compose_command(self, compose):
         if self.command is not None:
             compose['command'] = self.command
+
+    def _generate_compose_depends_on(self, compose):
+        if self.depends_on:
+            if type(self.depends_on) is dict:
+                internal = self.depends_on['internal'] if 'internal' in self.depends_on else []
+                external = [self._import_env(f"{v}.host") for v in
+                            (self.depends_on['external'] if 'external' in self.depends_on else [])]
+                compose['depends_on'] = internal + external
+            else:
+                compose['depends_on'] = self.depends_on
 
     def generate_build_files(self):
         template_params = {
