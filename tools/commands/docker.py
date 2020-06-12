@@ -78,6 +78,9 @@ class Docker(base_command.BaseCommand):
             if len(self.args.containers) > 0 else ''
         args = f"--force-rm {'--no-cache' if self.args.rebuild else ''}"
         self.run_shell(f"docker-compose build {args} {containers}")
+        versions_file = env.project_path('.versions')
+        if os.path.isfile(versions_file):
+            os.remove(versions_file)
 
     def _ps_handler(self):
         self._check_docker_config()
@@ -108,6 +111,9 @@ class Docker(base_command.BaseCommand):
         return container
 
     def __check_versions(self):
+        versions_file = env.project_path('.versions')
+        if os.path.isfile(versions_file):
+            os.remove(versions_file)
         tech_versions = {}
         containers = self.project.get_container_templates()
         for container in containers.values():
@@ -119,5 +125,5 @@ class Docker(base_command.BaseCommand):
                         tech_versions[vtech] += f" {tech_version}"
                     else:
                         tech_versions[vtech] = tech_version
-        with open(env.project_path('.versions'), 'w') as stream:
+        with open(versions_file, 'w') as stream:
             stream.write(yaml.dump(tech_versions))

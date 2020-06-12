@@ -32,6 +32,9 @@ class ProjectConfigManager:
             print(yaml.dump(compose))
         with open(compose_file_path, 'w') as docker_compose_file:
             yaml.dump(compose, docker_compose_file)
+        versions_file = env.project_path('.versions')
+        if os.path.isfile(versions_file):
+            os.remove(versions_file)
 
     def get_service_by_path(self, service_path):
         return None
