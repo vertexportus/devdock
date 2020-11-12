@@ -98,7 +98,7 @@ class ContainerTemplate(YamlTemplateObject):
                          f"{'-alpine' if use_alpine else ''}")
         else:
             image_tag = f"{data['suffix'].replace('-','') if 'suffix' in data else ''}"
-        if use_alpine:
+        if use_alpine and 'alpine' not in image_tag:
             image_tag = 'alpine' if image_tag == '' else f"{image_tag}-alpine"
         return image_tag if image_tag != '' else 'latest'
 
