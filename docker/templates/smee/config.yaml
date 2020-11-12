@@ -1,0 +1,11 @@
+required:
+  - url
+  - target
+containers:
+  smee:
+    stack:
+      - smee
+      - webhooks
+    build:
+      name: smee
+      use_alpine: true

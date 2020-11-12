@@ -93,3 +93,9 @@ class ProjectConfig(YamlDataObject):
             container_templates = {**container_templates, **{v.fullname: v
                                                              for v in service.get_container_templates().values()}}
         return container_templates
+
+    def convert_service_url_to_full_url(self, service_url):
+        https = 'https://' in service_url
+        url_split = service_url.replace('https://' if https else 'http://', '').split('/')
+        container_name = self.get_container_name_by_path(url_split.pop(0))
+        return f'{"https" if https else "http"}://{container_name}/{"/".join(url_split)}';

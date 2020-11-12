@@ -59,6 +59,8 @@ class ServiceTemplate(YamlTemplateObject):
             if os.path.isfile(env.docker_template_path(post_init_file_path)):
                 self.merge_load_template_data(post_init_file_path)
         self.params = self.try_get('params', {})
+        for container in self.containers.values():
+            container.final_load_env()
 
     def generate_compose(self, compose_services, compose_volumes):
         for container in self.containers.values():

@@ -51,6 +51,9 @@ class ContainerTemplate(YamlTemplateObject):
     def post_load_init(self):
         self._parse_env_imported()
 
+    def final_load_env(self):
+        self._parse_env()
+
     def _parse_tech_stack(self):
         self.tech_stack = self.try_get('stack', [])
         if len(self.tech_stack) > 0:
@@ -214,7 +217,8 @@ class ContainerTemplate(YamlTemplateObject):
             compose['volumes'] = container_volumes
 
     def _generate_compose_env(self, compose):
-        environment = {v: f"${{{k}}}" if k.isupper() else k for k, v in self.env.items()}
+        envs = self.env.items() if hasattr(self, 'env') else []
+        environment = {v: f"${{{k}}}" if k.isupper() else k for k, v in envs}
         if len(environment) > 0:
             compose['environment'] = environment
         if self.service.env_files:

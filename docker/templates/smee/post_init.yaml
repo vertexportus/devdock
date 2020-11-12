@@ -1,0 +1,6 @@
+containers:
+  smee:
+    env:
+      raw:
+        SMEE_PROXY_URL: %= service.get_required('url') =%
+        SMEE_TARGET_URL: %= master.convert_service_url_to_full_url(service.get_required('target')) =%
