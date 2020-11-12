@@ -43,7 +43,7 @@ class Service(YamlDataObject):
 
     def get_image_version(self, name):
         if self.version:
-            if type(self.version) == str or type(self.version) == int or type(self.version) == float:
+            if type(self.version) in [str, int, float]:
                 return self.version
             elif type(self.version) == dict:
                 return self.version[name]
