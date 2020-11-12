@@ -1,0 +1,19 @@
+containers:
+  angular:
+    stack:
+      - node
+      - nest
+    build:
+      name: node
+      use_alpine: true
+      args:
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+    volumes:
+      mapped:
+        - %= project.path =%:/app
+    env:
+      mapped:
+        - base_url
+    ports:
+      http: 3000

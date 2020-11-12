@@ -65,7 +65,11 @@ class ProjectConfig(YamlDataObject):
     def get_container_by_path(self, container_path):
         container = None
         if '.' in container_path:
-            raise Exception(f"TODO: get_container_by_path with . path {container_path=}")
+            [project_path, service_path] = container_path.split('.')
+            if project_path in self.projects:
+                project = self.projects[project_path]
+                if service_path in project.services:
+                    container = project.services[service_path].get_container_by_path(service_path)
         else:
             if container_path in self.services:
                 container = self.services[container_path].get_container_by_path(container_path)
