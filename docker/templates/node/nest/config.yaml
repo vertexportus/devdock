@@ -1,5 +1,5 @@
 containers:
-  angular:
+  nest:
     stack:
       - node
       - nest
@@ -15,5 +15,10 @@ containers:
     env:
       mapped:
         - base_url
+      imported:
+        DB_USER: database.user
+        DB_PASSWORD: database.password
+        DB_PORT: database.port
+        DB_HOST: database.host
     ports:
       http: 3000

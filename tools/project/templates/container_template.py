@@ -49,10 +49,12 @@ class ContainerTemplate(YamlTemplateObject):
         self.fullname = f"{base_name}_{self.name}" if not self.service_template.is_single_container else base_name
 
     def post_load_init(self):
-        self._parse_env_imported()
+        pass
+        # self._parse_env_imported()
 
     def final_load_env(self):
         self._parse_env()
+        self._parse_env_imported()
 
     def _parse_tech_stack(self):
         self.tech_stack = self.try_get('stack', [])
