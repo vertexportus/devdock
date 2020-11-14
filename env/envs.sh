@@ -2,6 +2,8 @@
 # shellcheck disable=SC2086
 # shellcheck disable=SC2155
 
+python=python3.8
+
 # colors
 color_text="\e[0;36m"
 color_text_hl="\e[1;36m"
@@ -22,10 +24,10 @@ export USERID=$(id -u)
 export GROUPID=$(id -g)
 
 devdock_utils=$DEVDOCK_PATH/env/utils
-is_tech_used="python3 ${devdock_utils}/is_tech_used.py"
-get_tech_version="python3 $devdock_utils/get_tech_version.py"
+is_tech_used="$python ${devdock_utils}/is_tech_used.py"
+get_tech_version="$python $devdock_utils/get_tech_version.py"
 # url
-url=$(python3 $devdock_utils/get_env_url.py)
+url=$($python $devdock_utils/get_env_url.py)
 if [[ -n $url ]]; then export BASE_URL=$url; else export BASE_URL=localhost; fi
 
 # php
