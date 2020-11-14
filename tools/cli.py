@@ -16,6 +16,7 @@ command_modules = {
     "composer": 'php',
     "laravel": 'laravel',
     "npm": 'node',
+    "yarn": 'node',
 }
 
 
