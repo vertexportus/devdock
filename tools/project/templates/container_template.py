@@ -55,6 +55,7 @@ class ContainerTemplate(YamlTemplateObject):
     def final_load_env(self):
         self._parse_env()
         self._parse_env_imported()
+        self._parse_env_from_service()
 
     def _parse_tech_stack(self):
         self.tech_stack = self.try_get('stack', [])
@@ -127,6 +128,9 @@ class ContainerTemplate(YamlTemplateObject):
             env_config = self._data['env']
             self.env = {**self.env, **{self._parse_import_env(v): k for k, v in
                                        (env_config['imported'] if 'imported' in env_config else {}).items()}}
+
+    def _parse_env_from_service(self):
+        self.env = {**self.env, **{e: e for e in self.service.env}}
 
     def _parse_import_env(self, import_data):
         if '${' in import_data:  # do regex matching

@@ -11,6 +11,7 @@ class Service(YamlDataObject):
     ports: bool or list
     env_prefix: str
     env_files: bool or list
+    env: list
     tech_stack: list
     template: ServiceTemplate
 
@@ -24,6 +25,7 @@ class Service(YamlDataObject):
         self.ports = self.try_get('ports', False)
         self.env_prefix = self.try_get('env_prefix', name).upper()
         self.env_files = self.try_get('env_files', False)
+        self.env = self.try_get('env', [])
         self.tech_stack = []
         self.template = ServiceTemplate(service=self, name=self.get_required('template'))
 
