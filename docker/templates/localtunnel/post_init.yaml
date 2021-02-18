@@ -1,0 +1,6 @@
+containers:
+  localtunnel:
+    env:
+      raw:
+        LOCALTUNNEL_PROXY_PORT: %= master.get_service_port_http(service.get_required('target')) =%
+        LOCALTUNNEL_PROXY_LOCAL_HOST: %= master.get_container_name_by_path(service.get_required('target')) =%

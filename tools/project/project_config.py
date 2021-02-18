@@ -99,3 +99,10 @@ class ProjectConfig(YamlDataObject):
         url_split = service_url.replace('https://' if https else 'http://', '').split('/')
         container_name = self.get_container_name_by_path(url_split.pop(0))
         return f'{"https" if https else "http"}://{container_name}/{"/".join(url_split)}';
+
+    def get_service_port_http(self, service):
+        container = self.get_container_by_path(service)
+        if 'http' not in container.ports:
+            raise Exception(f"service {service} does not contain http port config")
+        http = container.ports['http']
+        return f"{http['env']}:-{http['default']}"
