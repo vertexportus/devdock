@@ -1,0 +1,11 @@
+required:
+  - url
+  - target
+containers:
+  localtunnel:
+    stack:
+      - localtunnel
+      - webhooks
+    build:
+      name: localtunnel
+      use_alpine: true
