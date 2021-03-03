@@ -1,0 +1,18 @@
+containers:
+  redis:
+    stack:
+      - nosql
+      - redis
+      - cache
+      - queue
+    image:
+      name: bitnami/redis
+      use_alpine: false
+    volumes:
+      named:
+        data: /bitnami/redis/data
+    env:
+      prefixed:
+        REDIS_PASSWORD: password
+    ports:
+      redis: 6379
