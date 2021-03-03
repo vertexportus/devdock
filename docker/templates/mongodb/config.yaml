@@ -1,0 +1,17 @@
+containers:
+  mongodb:
+    stack:
+      - nosql
+      - mongo
+      - mongodb
+    image:
+      name: bitnami/mongodb
+      use_alpine: false
+    volumes:
+      named:
+        data: /bitnami/mongodb
+    env:
+      prefixed:
+        MONGODB_ROOT_PASSWORD: root_password
+    ports:
+      db: 27017
