@@ -146,7 +146,6 @@ class ContainerTemplate(YamlTemplateObject):
                                 self._parse_env_imported_from_container(d)
                         else:
                             self._parse_env_imported_from_container(data)
-        print(f"{self.env=}")
 
     def _parse_env_imported_from_container(self, container_name):
         container = self.service.master.get_container_by_path(container_name)
