@@ -15,5 +15,10 @@ containers:
         POSTGRES_USER: user
         POSTGRES_PASSWORD: password
         POSTGRES_DB: database
+      exported:
+        - user
+        - password
+        - database
+        - host
     ports:
       db: 5432
