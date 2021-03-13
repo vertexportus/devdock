@@ -4,6 +4,8 @@ containers:
       - nosql
       - mongo
       - mongodb
+    versioning:
+      mongodb: mongo --version | head -n 1 | sed 's/^MongoDB shell version v//'
     image:
       name: bitnami/mongodb
       use_alpine: false
