@@ -15,4 +15,4 @@ class Yarn(base_command.BaseCommand):
         service = project.get_service_by_tech('node')
         params = ' '.join(self.args.params) if len(self.args.params) else ''
         self.run_shell(f"docker run --rm -v {project.path}:/app "
-                       f"--workdir /app node:{service.get_image_version('node')}-alpine npm {params}")
+                       f"--workdir /app node:{service.get_image_version('node')}-alpine yarn {params}")

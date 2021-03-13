@@ -76,6 +76,17 @@ class ContainerTemplate(YamlTemplateObject):
                 return env.env_var_format(env_full_name, port_config['default'])
         return None
 
+    def get_exported_env(self):
+        env_prefix = self.service.env_prefix
+        if 'env' in self._data:
+            env_config = self._data['env']
+            if 'exported' in env_config:
+                return {f"{env_prefix}_{v}".upper(): self.get_env_var(v) for v in env_config['exported']}
+            else:
+                return {}
+        else:
+            return {}
+
     def _parse_image(self):
         if 'image' in self._data:
             if 'name' not in self._data['image']:
@@ -126,8 +137,20 @@ class ContainerTemplate(YamlTemplateObject):
     def _parse_env_imported(self):
         if 'env' in self._data:
             env_config = self._data['env']
-            self.env = {**self.env, **{self._parse_import_env(v): k for k, v in
-                                       (env_config['imported'] if 'imported' in env_config else {}).items()}}
+            if 'import' in env_config:
+                for to_import in env_config['import']:
+                    if hasattr(self.service, to_import):
+                        data = getattr(self.service, to_import);
+                        if isinstance(data, list):
+                            for d in data:
+                                self._parse_env_imported_from_container(d)
+                        else:
+                            self._parse_env_imported_from_container(data)
+        print(f"{self.env=}")
+
+    def _parse_env_imported_from_container(self, container_name):
+        container = self.service.master.get_container_by_path(container_name)
+        self.env = {**self.env, **{v: k for k, v in container.get_exported_env().items()}}
 
     def _parse_env_from_service(self):
         self.env = {**self.env, **{e: e for e in self.service.env}}

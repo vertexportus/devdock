@@ -9,3 +9,6 @@ containers:
     build:
       name: localtunnel
       use_alpine: true
+    env:
+      prefixed:
+        LOCALTUNNEL_SUBDOMAIN: subdomain

@@ -13,5 +13,14 @@ containers:
     env:
       prefixed:
         MONGODB_ROOT_PASSWORD: root_password
+        MONGODB_USERNAME: user
+        MONGODB_PASSWORD: password
+        MONGODB_DATABASE: database
+      exported:
+        - user
+        - password
+        - database
+        - root_password
+        - host
     ports:
       db: 27017

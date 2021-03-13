@@ -33,11 +33,8 @@ containers:
       mapped:
         - %= project.path =%:/var/www
     env:
-      imported:
-        DB_USER: database.user
-        DB_PASSWORD: database.password
-        DB_PORT: database.port
-        DB_HOST: database.host
+      import:
+        - database
   web:
     stack:
       - http

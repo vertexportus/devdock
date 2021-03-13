@@ -15,10 +15,7 @@ containers:
     env:
       mapped:
         - base_url
-      imported:
-        DB_DATABASE: database.database
-        DB_USER: database.user
-        DB_PASSWORD: database.password
-        DB_HOST: database.host
+      import:
+        - database
     ports:
       http: 3000
