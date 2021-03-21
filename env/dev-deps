@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+#dependencies
+source ${PROJECT_PATH}/devdock/env/utils/python.rc
+# test for python version
+py_cmd=$(get_python_runtime)
+if [ $? -eq 0 ]; then
+    # run command
+    $py_cmd -m pip install -r ${PROJECT_PATH}/devdock/tools/requirements.txt
+else
+    echo -e "error: $py_cmd"
+fi

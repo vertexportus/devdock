@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+function test_python_runtime() {
+    local py_test='import sys; assert sys.version_info >= (3,8)'
+    local py_runtime=$1
+
+    if command -v $py_runtime &> /dev/null; then
+        if ! $py_runtime -c "$py_test" &> /dev/null; then
+            return 1
+        fi
+    else
+        return 1
+    fi
+    return 0
+}
+
+function get_python_runtime() {
+    local py_cmd=python
+    test_python_runtime $py_cmd
+    if [ $? -eq 1 ]; then
+        local py_cmd=python3
+        test_python_runtime $py_cmd
+        if [ $? -eq 1 ]; then
+            local py_cmd=python3.8
+            test_python_runtime $py_cmd
+            if [ $? -eq 1 ]; then
+                echo -e "\e[31mYou need python >=3.8 to run rq\e[0m"
+                return 1
+            fi
+        fi
+    fi
+
+    echo $py_cmd
+    return 0
+}
