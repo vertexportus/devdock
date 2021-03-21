@@ -152,7 +152,18 @@ class ContainerTemplate(YamlTemplateObject):
         self.env = {**self.env, **{v: k for k, v in container.get_exported_env().items()}}
 
     def _parse_env_from_service(self):
-        self.env = {**self.env, **{e: e for e in self.service.env}}
+        service_env_mapping = {}
+        if isinstance(self.service.env, dict):
+            service_env_mapping = {v.replace('$', ''): k for k, v in self.service.env.items()}
+        else:
+            for e in self.service.env:
+                if '=' in e:
+                    [k, v] = e.split('=')
+                    service_env_mapping[v.replace('$', '')] = k
+                else:
+                    service_env_mapping[e] = e
+        # save new env
+        self.env = {**self.env, **service_env_mapping}
 
     def _parse_import_env(self, import_data):
         if '${' in import_data:  # do regex matching
