@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 
-# run command
+# dependencies
+source ${PROJECT_PATH}/devdock/env/utils/python.rc
+if [ "$1" == "deps" ]; then
+    bash ${PROJECT_PATH}/devdock/env/dev-deps
+    exit 0
+fi
+# try run command
 if [ -z $CLI_COMMAND ]; then export CLI_COMMAND=$(basename "$0"); fi
-${PROJECT_PATH}/devdock/tools/cli.py $*
+py_cmd=$(get_python_runtime)
+if [ $? -eq 0 ]; then
+    $py_cmd ${PROJECT_PATH}/devdock/tools/cli.py $*
+else
+    echo -e "error: $py_cmd"
+fi
