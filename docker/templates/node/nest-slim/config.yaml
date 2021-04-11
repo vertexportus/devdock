@@ -1,0 +1,22 @@
+containers:
+  nest:
+    stack:
+      - node
+      - nest
+    build:
+      name: node
+      suffix: -slim
+      use_alpine: false
+      args:
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+    volumes:
+      mapped:
+        - %= project.path =%:/app
+    env:
+      mapped:
+        - base_url
+      import:
+        - database
+    ports:
+      http: 3000
