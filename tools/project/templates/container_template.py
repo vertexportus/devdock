@@ -5,7 +5,7 @@ import requests
 import yaml
 from clint.textui import progress
 
-from project.generation import generate_build_files
+from project.generation import generate_build_files, rebuild_marker_append
 from utils import env
 from utils.templates import Templates
 from utils.yaml_template_object import YamlTemplateObject
@@ -320,7 +320,7 @@ class ContainerTemplate(YamlTemplateObject):
         dest_path = (f"build/{self.service.master.current_env}/"
                      f"{base_path if type(base_path) == str else base_path[len(base_path) - 1]}{path_suffix}")
         paths = list(map(lambda x: f"{x}/build{path_suffix}", base_path if type(base_path) == list else [base_path]))
-        generate_build_files(paths, dest_path, self.templates, **template_params)
+        changed = generate_build_files(paths, dest_path, self.templates, **template_params)
         # download files
         if self.download is not None:
             for download_path, download_url in self.download.items():
@@ -339,3 +339,12 @@ class ContainerTemplate(YamlTemplateObject):
                             if chunk:
                                 f.write(chunk)
                                 f.flush()
+                    changed = True
+        if changed:
+            rebuild_marker_append(self.get_proper_name())
+
+    def get_proper_name(self):
+        self_name = self.service.name
+        names = [self.service.project.name] if self.service.project else []
+        names.append(self.service.name)
+        return '.'.join(names)
