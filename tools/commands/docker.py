@@ -56,7 +56,7 @@ class Docker(base_command.BaseCommand):
         if self.args.rebuild:
             self.run_shell("docker-compose down")
             self.run_shell("docker-compose build --no-cache")
-            self.project.rebuild_marker_reset()
+            self.project.reset_rebuild()
         else:
             # check .rebuild tag file
             if (not self.args.build) and rebuild_file_exists:
