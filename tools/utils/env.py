@@ -55,6 +55,10 @@ def docker_compose_file_path(for_env=None) -> str:
     return docker_gen_path(f"docker-compose-{for_env if for_env else env()}.yaml")
 
 
+def docker_gen_rebuild_flag_path() -> str:
+    return docker_gen_path(".rebuild")
+
+
 def git_use_ssh():
     return bool(os.environ['GIT_USE_SSH']) if 'GIT_USE_SSH' in os.environ else True
 

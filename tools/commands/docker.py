@@ -1,3 +1,4 @@
+import json
 import os
 import yaml
 import argparse
@@ -50,9 +51,22 @@ class Docker(base_command.BaseCommand):
             self.project.generate_docker(False)
         else:
             self._check_docker_config(gen=True)
+        # check rebuild
+        rebuild_file_exists = os.path.exists(env.docker_gen_rebuild_flag_path())
         if self.args.rebuild:
             self.run_shell("docker-compose down")
             self.run_shell("docker-compose build --no-cache")
+            self.project.rebuild_marker_reset()
+        else:
+            # check .rebuild tag file
+            if (not self.args.build) and rebuild_file_exists:
+                rebuild_images = self.project.get_rebuild()
+                print(' '.join([utils.colors.yellow("docker configs changed for the following:"),
+                                utils.colors.byellow(' '.join(rebuild_images)),
+                                utils.colors.byellow(f'\nrebuilding:')]))
+                for image in rebuild_images:
+                    self.run_shell(f"docker-compose build --no-cache {self.__get_container_name(image)}")
+                self.project.reset_rebuild()
         up_args = f"--remove-orphans {'' if self.args.attach else '-d'} {'--build' if self.args.build else ''}"
         self.run_shell(f"docker-compose up {up_args}")
         print()
@@ -74,7 +88,7 @@ class Docker(base_command.BaseCommand):
             self.project.generate_docker(False)
         else:
             self._check_docker_config(gen=True)
-        containers = ' '.join(list(map(lambda x: self.__get_container_name(x), self.args.containers)))\
+        containers = ' '.join(list(map(lambda x: self.__get_container_name(x), self.args.containers))) \
             if len(self.args.containers) > 0 else ''
         args = f"--force-rm {'--no-cache' if self.args.rebuild else ''}"
         self.run_shell(f"docker-compose build {args} {containers}")

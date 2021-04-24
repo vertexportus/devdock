@@ -1,8 +1,12 @@
+import os
+import json
+
 from dict_deep import deep_get
 
 from utils import env
 from utils.templates import Templates
 from utils.yaml_data_object import YamlDataObject
+from .generation import rebuild_marker_load, rebuild_marker_save, rebuild_marker_reset
 from .project import Project
 from .project_repo import ProjectRepo
 from .service import Service
@@ -45,11 +49,15 @@ class ProjectConfig(YamlDataObject):
             'services': {},
             'volumes': {}
         }
+        rebuild_marker_load()
         for service in self.services.values():
             service.generate_compose(compose['services'], compose['volumes'])
         for project in self.projects.values():
             project.generate_compose(compose['services'], compose['volumes'])
+        rebuild = rebuild_marker_save()
         return compose
+
+
 
     def get_compose_version(self):
         compose_version = deep_get(self.docker, 'compose.version')

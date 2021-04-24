@@ -2,6 +2,7 @@ import os
 
 import yaml
 
+from .generation import rebuild_marker_load, rebuild_marker_save, rebuild_marker_reset
 from .project_config import ProjectConfig
 from utils import env
 
@@ -61,3 +62,15 @@ class ProjectConfigManager:
 
     def get_container_templates(self):
         return self.config.get_container_templates()
+
+    @staticmethod
+    def get_rebuild():
+        return rebuild_marker_load()
+
+    @staticmethod
+    def save_rebuild():
+        return rebuild_marker_save()
+
+    @staticmethod
+    def reset_rebuild():
+        return rebuild_marker_reset()
