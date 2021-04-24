@@ -17,7 +17,10 @@ class Templates:
             variable_start_string='%=',
             variable_end_string='=%',
             comment_start_string='%#',
-            comment_end_string='#%'
+            comment_end_string='#%',
+            trim_blocks=True,
+            lstrip_blocks=True,
+            keep_trailing_newline=True
         )
         self.env.filters['version'] = self.version
         self.env.filters['dmap'] = self.dmap
