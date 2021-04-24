@@ -14,5 +14,8 @@ containers:
     env:
       prefixed:
         REDIS_PASSWORD: password
+      exported:
+        - password
+        - host
     ports:
       redis: 6379
