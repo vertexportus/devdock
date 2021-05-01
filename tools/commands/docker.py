@@ -18,6 +18,9 @@ class Docker(base_command.BaseCommand):
         parser_up.add_argument('--build', action="store_true", help="builds containers if Dockerfiles have changed")
         parser_up.add_argument('--rebuild', action="store_true", help="forces a rebuild of all container images")
         parser_up.add_argument('-g', '--generate', action="store_true", help="generate docker config")
+        #docker restart
+        parser_restart = subparser.add_parser('restart', help="restarts containers")
+        
         # docker down
         parser_down = subparser.add_parser('down', help="stops containers")
         parser_down.add_argument('params', nargs=argparse.REMAINDER,
@@ -71,6 +74,11 @@ class Docker(base_command.BaseCommand):
         self.run_shell(f"docker-compose up {up_args}")
         print()
         self.__check_versions()
+        self.run_shell("docker-compose ps")
+
+    def _restart_handler(self):
+        self.run_shell("docker-compose restart")
+        print()
         self.run_shell("docker-compose ps")
 
     def _down_handler(self):
