@@ -18,10 +18,14 @@ class Docker(base_command.BaseCommand):
         parser_up.add_argument('--build', action="store_true", help="builds containers if Dockerfiles have changed")
         parser_up.add_argument('--rebuild', action="store_true", help="forces a rebuild of all container images")
         parser_up.add_argument('-g', '--generate', action="store_true", help="generate docker config")
+        #docker restart
+        parser_restart = subparser.add_parser('restart', help="restarts containers")
+        parser_restart.add_argument('containers', nargs=argparse.REMAINDER, help="list of containers to restart")
+        
         # docker down
         parser_down = subparser.add_parser('down', help="stops containers")
         parser_down.add_argument('params', nargs=argparse.REMAINDER,
-                                 help='additional arguments passed directly into docker-compose down')
+                                help='additional arguments passed directly into docker-compose down')
         # docker destroy
         parser_destroy = subparser.add_parser('destroy', help="destroys all containers and images")
         # docker build
@@ -36,7 +40,7 @@ class Docker(base_command.BaseCommand):
         parser_exec.add_argument('container', help="container simplified name (ie: repairq_web_1 is named web)")
         parser_exec.add_argument('exec_command', help="command to run inside specified container")
         parser_exec.add_argument('params', nargs=argparse.REMAINDER,
-                                 help="additional parameters for container exec_command")
+                                help="additional parameters for container exec_command")
         # docker logs
         parser_logs = subparser.add_parser('logs', help="shows all container logs (or specified container logs)")
         parser_logs.add_argument('container', help="specific container to show logs from", nargs="?", default="all")
@@ -71,6 +75,13 @@ class Docker(base_command.BaseCommand):
         self.run_shell(f"docker-compose up {up_args}")
         print()
         self.__check_versions()
+        self.run_shell("docker-compose ps")
+
+    def _restart_handler(self):
+        containers = ' '.join(list(map(lambda x: self.__get_container_name(x), self.args.containers))) \
+            if len(self.args.containers) > 0 else ''
+        self.run_shell(f"docker-compose restart {containers}")
+        print()
         self.run_shell("docker-compose ps")
 
     def _down_handler(self):
