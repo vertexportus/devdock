@@ -19,3 +19,4 @@ containers:
         - database
     ports:
       http: 3000
+      debug: 9229

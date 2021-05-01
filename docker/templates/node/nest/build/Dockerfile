@@ -16,4 +16,5 @@ ENV PATH /app/node_modules/.bin:$PATH
 # finalize and run
 WORKDIR /app
 EXPOSE 3000
-CMD ["sh", "-c", "yarn start:dev"]
+EXPOSE 9229
+CMD ["sh", "-c", "yarn start:debug"]
