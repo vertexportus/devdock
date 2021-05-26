@@ -2,7 +2,7 @@
 # shellcheck disable=SC2086
 # shellcheck disable=SC2155
 
-python=python3.8
+python=python3.9
 
 # colors
 color_text="\e[0;36m"
