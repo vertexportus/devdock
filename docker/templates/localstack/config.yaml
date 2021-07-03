@@ -1,0 +1,19 @@
+containers:
+  localstack:
+    stack:
+      - localstack
+      - aws
+    image:
+      name: localstack/localstack
+      use_alpine: false
+    env:
+      raw:
+        DEBUG: "true"
+        DATA_DIR: /tmp/localstack/data
+        LAMBDA_EXECUTOR: local
+        DOCKER_HOST: unix:///var/run/docker.sock
+    ports:
+      http: 4566
+    volumes:
+      named:
+        data: /tmp/localstack
