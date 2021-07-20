@@ -1,0 +1,22 @@
+containers:
+  bullboard:
+    stack:
+      - nosql
+      - redis
+      - cache
+      - queue
+    image:
+      name: deadly0/bull-board
+      use_alpine: false
+    env:
+      imported:
+        REDIS_HOST: ${redis.host}
+        REDIS_PORT: ${redis.port}
+        REDIS_PASSWORD: ${redis.password}
+    ports:
+      http: 5000:3000
+    depends_on:
+      - redis
+    volumes:
+      named:
+        data: /tmp/bullboard
