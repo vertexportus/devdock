@@ -1,0 +1,20 @@
+containers:
+  bullboard:
+    stack:
+      - nosql
+      - redis
+      - cache
+      - queue
+    image:
+      name: deadly0/bull-board
+      use_alpine: false
+    env:
+      import:
+        - database
+    ports:
+      bullboard: 5000:3000
+    depends_on:
+      - redis
+    volumes:
+      named:
+        data: /tmp/bullboard
