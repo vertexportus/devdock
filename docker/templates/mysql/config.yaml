@@ -1,0 +1,26 @@
+containers:
+  mysql:
+    stack:
+      - sql
+      - mysql
+      - mysql8
+    image:
+      name: mysql
+      use_alpine: false
+    volumes:
+      named:
+        data: /var/lib/mysql
+    env:
+      prefixed:
+        MYSQL_USER: user
+        MYSQL_PASSWORD: password
+        MYSQL_DATABASE: database
+        MYSQL_ROOT_PASSWORD: root_password
+      exported:
+        - user
+        - password
+        - database
+        - host
+        - root_password
+    ports:
+      db: 3306
